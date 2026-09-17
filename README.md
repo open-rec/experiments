@@ -5,12 +5,11 @@ are **EB-NeRD** and **KuaiRand-1K**. The project first establishes trustworthy
 baselines, then studies training-serving feature consistency, feature freshness,
 and the trade-off between recommendation quality and system cost.
 
-**Current status: experiment infrastructure validated with synthetic data. No
-real-dataset results or SOTA claims are available yet.** The first version reuses
-the feature aggregation, `FeatureSpace`, LR, and FM implementations from
-`rec-algorithm`. Online performance replay through `rec-server` and
-`rank-engine` is not integrated yet. Experiment checkpoints use OpenRec model
-formats but are never published to a serving environment automatically.
+**Current status: preliminary real-data baselines are available; no official
+leaderboard or SOTA claims are available yet.** The first version reuses the
+feature aggregation, `FeatureSpace`, LR, and FM implementations from
+`rec-algorithm`. Experiment checkpoints use OpenRec model formats but are never
+published to a serving environment automatically.
 
 ## Installation
 
@@ -86,7 +85,8 @@ baseline is a smoothed item click-rate estimate fitted on the training split.
 `studies/baselines/ebnerd-content.json` enables OpenRec's cold-start content
 features (hashed title/topic/subcategory and point-in-time content age) while
 keeping the baseline split, labels and optimizer fixed for a controlled
-ablation.
+ablation. Run it with both `--model lr` and `--model fm` to reproduce the full
+behavior/content model matrix.
 Formal baseline runs use seeds 42, 43, and 44, a separate output directory for
 every run, and a preserved copy of the effective configuration.
 

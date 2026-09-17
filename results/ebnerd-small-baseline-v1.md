@@ -16,8 +16,9 @@ are local validation. Boundaries follow the observed 07:00 UTC dataset day.
 |---|---:|---:|---:|---:|---:|
 | Popularity | 42 | 0.56467 | 0.32585 | 0.37074 | 0.45081 |
 | OpenRec LR | 42/43/44 | 0.55039 ± 0.00177 | 0.33952 ± 0.00196 | 0.37962 ± 0.00216 | 0.45630 ± 0.00198 |
+| OpenRec LR + content | 42/43/44 | **0.58197 ± 0.00095** | **0.35812 ± 0.00115** | **0.40192 ± 0.00137** | **0.47571 ± 0.00122** |
 | OpenRec FM | 42/43/44 | 0.55864 ± 0.00058 | 0.34696 ± 0.00074 | 0.38779 ± 0.00082 | 0.46372 ± 0.00072 |
-| OpenRec FM + content | 42/43/44 | **0.57292 ± 0.00297** | **0.35098 ± 0.00282** | **0.39328 ± 0.00275** | **0.46889 ± 0.00255** |
+| OpenRec FM + content | 42/43/44 | 0.57292 ± 0.00297 | 0.35098 ± 0.00282 | 0.39328 ± 0.00275 | 0.46889 ± 0.00255 |
 
 The values after `±` are sample standard deviations across seeds. Popularity
 has one deterministic run. The content variant adds fixed-width signed hashes
@@ -26,11 +27,18 @@ prepared-data SHA-256 is
 `7e05c3223952a5ac3e3ede8cd8f3e7d10482c0b953f08d7d7ccd99b587b81d8f`.
 Against behavior-only FM, content improves mean Macro AUC by 0.01427, MRR by
 0.00403, NDCG@5 by 0.00549 and NDCG@10 by 0.00517.
+Against behavior-only LR, content improves mean Macro AUC by 0.03158, MRR by
+0.01860, NDCG@5 by 0.02230 and NDCG@10 by 0.01941. LR + content also exceeds
+FM + content by 0.00905 Macro AUC under this protocol. This indicates that the
+useful signal in the current hashed metadata is largely linear; the present FM
+interactions do not improve on it.
 
-For the seed-42 diagnostic, content improves Macro AUC from 0.56312 to 0.57547
-on the 239,799 impressions whose clicked articles are all unseen in training.
-It reduces Macro AUC from 0.32318 to 0.28451 on the much smaller 4,825
-all-warm-click impressions. This supports the cold-start value of content but
-also shows that a warm-item gate or richer hybrid needs evaluation. History-aware
-and semantic news baselines remain required before drawing model-quality or SOTA
-claims.
+For the seed-42 diagnostic, LR + content improves Macro AUC from 0.55440 to
+0.58833 on the 239,799 impressions whose clicked articles are all unseen in
+training. It reduces Macro AUC from 0.33420 to 0.24364 on the much smaller 4,825
+all-warm-click impressions. FM + content shows the same direction: 0.56312 to
+0.57547 for all-cold-click impressions and 0.32318 to 0.28451 for
+all-warm-click impressions. There are another 23 mixed impressions. This
+supports the cold-start value of content but also shows that a warm-item gate,
+calibration, or richer hybrid needs evaluation. History-aware and semantic news
+baselines remain required before drawing model-quality or SOTA claims.
