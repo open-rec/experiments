@@ -62,7 +62,7 @@ files are resolved from the current working directory.
 .venv/bin/python -m openrec_experiments.cli prepare \
   --config datasets/ebnerd/prepare.json --output data/processed/ebnerd-small-content.parquet
 .venv/bin/python -m openrec_experiments.cli prepare \
-  --config datasets/kuairand/prepare.json --output data/processed/kuairand-1k.parquet
+  --config datasets/kuairand/prepare.json --output data/processed/kuairand-1k-content.parquet
 ```
 
 The adapters preserve observed exposure labels and candidate identities; they
@@ -87,6 +87,9 @@ features (hashed title/topic/subcategory and point-in-time content age) while
 keeping the baseline split, labels and optimizer fixed for a controlled
 ablation. Run it with both `--model lr` and `--model fm` to reproduce the full
 behavior/content model matrix.
+`studies/baselines/kuairand-content.json` provides the equivalent controlled
+ablation using static basic video metadata. It deliberately excludes aggregate
+video statistics and static user snapshots.
 Formal baseline runs use seeds 42, 43, and 44, a separate output directory for
 every run, and a preserved copy of the effective configuration.
 

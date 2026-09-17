@@ -1,0 +1,20 @@
+{
+  "dataset": "kuairand-1k",
+  "data": "data/processed/kuairand-1k-content.parquet",
+  "openrec_algorithm": "../rec-algorithm",
+  "model": "fm",
+  "seed": 42,
+  "epochs": 10,
+  "batch_size": 1024,
+  "learning_rate": 0.001,
+  "factor_dim": 8,
+  "threads": 2,
+  "content_features": true,
+  "train_start": "2022-04-07T14:00:00Z",
+  "validation_start": "2022-04-18T16:00:00Z",
+  "test_start": "2022-04-21T16:00:00Z",
+  "test_end": "2022-05-08T16:00:00Z",
+  "update_interval_ms": 86400000,
+  "feedback_delay_ms": 3600000,
+  "evaluation_feedback": "frozen"
+}

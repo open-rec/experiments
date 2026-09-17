@@ -113,6 +113,29 @@ def test_random_policy_is_not_training_or_validation():
     assert set(metrics["by_policy"]) == {"random", "standard"}
 
 
+def test_kuairand_static_video_content_projection():
+    base = ebnerd(*raw_ebnerd())
+    logs = pd.DataFrame({"user_id": base.user_id, "video_id": base.item_id,
+                         "time_ms": base.timestamp, "is_click": base.label,
+                         "is_rand": 0, "tab": 0})
+    videos = pd.DataFrame({
+        "video_id": [10, 20, 30],
+        "video_type": ["NORMAL", "NORMAL", "AD"],
+        "upload_dt": ["2023-05-17"] * 3,
+        "upload_type": ["Web", "ShortImport", "Web"],
+        "tag": ["sport", "music", None],
+    })
+    frame = kuairand(logs, videos)
+    assert set(frame.category) == {"NORMAL", "AD"}
+    assert set(frame.subcategory) == {"Web", "ShortImport"}
+    assert frame.loc[frame.item_id.eq("10"), "tags"].eq("sport").all()
+    assert frame.pub_time.eq(int(pd.Timestamp("2023-05-17T00:00:00Z").timestamp())).all()
+    assert frame.title.eq("").all()
+
+    with pytest.raises(ValueError, match="duplicate"):
+        kuairand(logs, pd.concat([videos, videos.iloc[[0]]]))
+
+
 def test_features_ignore_same_time_and_future_labels():
     load_openrec(ROOT)
     frame = ebnerd(*raw_ebnerd())

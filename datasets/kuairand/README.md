@@ -17,7 +17,9 @@ Prefer the provider's domestic mirror. If it is unavailable, configure
 Never store proxy credentials in this repository. Always verify the provider
 MD5 before extracting, regardless of which endpoint supplied the archive.
 
-Only user_id, video_id, time_ms, is_click, is_rand and tab are read. In v1,
-user_features and video_features_statistic are intentionally excluded because
+Exposure rows use user_id, video_id, time_ms, is_click, is_rand and tab. The
+content projection joins `video_features_basic_1k.csv` and maps video type,
+upload type, tag, and upload date to OpenRec item content fields. User features
+and `video_features_statistic_1k.csv` are intentionally excluded because their
 historical availability has not been established. Ordinary/random exposure
 strata remain separate. Inspect tab semantics before interpreting is_click.
