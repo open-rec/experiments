@@ -130,6 +130,10 @@ strong external baselines, statistical inference, and serving replay remain on
 the [research plan](docs/RESEARCH_PLAN.md). A SOTA claim requires evidence under
 the same protocol against strong baselines on an untouched test set.
 
+Reviewable summaries from completed real-data runs are published under
+[results](results/README.md). Each summary states its protocol and maturity;
+preliminary local results are kept separate from official leaderboard claims.
+
 ## Exporting result tables
 
 Use options such as `run --model lr --seed 43` to override the model and seed.

@@ -28,6 +28,18 @@ Global UTC boundaries define [train_start, validation_start),
 cross a boundary. Older supplied observations may warm features, but do not train
 model parameters. Random observations never contribute history.
 
+EB-NeRD-small uses the observed 07:00 UTC dataset boundary: the first four days
+of official training data are local training, its final three days are local
+validation, and the official validation bundle is local test. This preserves
+the provider split instead of mixing the last training hours into test.
+
+KuaiRand-1K uses the first eleven days of the earlier standard-log bundle for
+training and its final three days for validation. The later standard and random
+bundles form test from 2022-04-22 local calendar time onward. Random exposure is
+therefore retained only for final evaluation and never participates in model or
+epoch selection. The small number of records outside the declared local-day
+boundaries is excluded and must be reported in the data audit.
+
 Feature visibility cutoff for timestamp t is:
 `floor(t / update_interval_ms) * update_interval_ms - feedback_delay_ms`.
 Only history strictly earlier than this cutoff can contribute. Frozen mode caps

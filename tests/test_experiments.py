@@ -72,6 +72,23 @@ def test_metrics_known_multiclick_example():
     assert binary_metrics([1, 1], [.5, .5])["auc"] is None
 
 
+def test_vectorized_group_metrics_preserve_tie_semantics():
+    frame = pd.DataFrame({
+        "group_id": ["a"] * 4 + ["b"] * 3,
+        "sample_id": ["2", "1", "4", "3", "7", "5", "6"],
+        "label": [1, 0, 1, 0, 0, 1, 0],
+    })
+    scores = [.8, .8, .2, .2, .5, .5, .1]
+    result = evaluate(frame, scores, "ebnerd")["impression_macro"]
+
+    # Group a has one tied positive/negative pair at each score (AUC .5).
+    # Group b ties its positive with one negative and beats the other (AUC .75).
+    assert result["auc"] == pytest.approx(.625)
+    assert result["mrr"] == pytest.approx(((1 / 2 + 1 / 4) / 2 + 1) / 2)
+    assert result["ndcg@5"] <= 1
+    assert result["ndcg@10"] <= 1
+
+
 def test_random_policy_is_not_training_or_validation():
     base = ebnerd(*raw_ebnerd())
     logs = pd.DataFrame({"user_id": base.user_id, "video_id": base.item_id,
