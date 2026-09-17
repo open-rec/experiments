@@ -1,7 +1,7 @@
 # KuaiRand-1K baseline v1
 
-Status: preliminary local temporal holdout; LR/FM results cover seeds 42, 43,
-and 44.
+Status: preliminary local temporal holdout; LR/FM/Transformer results cover
+seeds 42, 43, and 44.
 
 The prepared dataset contains 11,756,073 exposures, 1,000 users, 4,371,868
 items, 15 scenes, and 4,437,332 positive labels. The behavior-only projection
@@ -19,14 +19,31 @@ history.
 | OpenRec LR | 42/43/44 | 0.74603 ± 0.00016 | 0.57106 ± 0.00025 | **0.66376 ± 0.00020** | 0.66958 ± 0.00460 |
 | OpenRec LR + content | 42/43/44 | 0.75119 ± 0.00011 | 0.56764 ± 0.00025 | 0.66158 ± 0.00048 | 0.68669 ± 0.00584 |
 | OpenRec FM | 42/43/44 | 0.74970 ± 0.00017 | 0.56836 ± 0.00016 | 0.65923 ± 0.00101 | 0.68172 ± 0.00223 |
-| OpenRec FM + content | 42/43/44 | **0.75687 ± 0.00005** | **0.56218 ± 0.00012** | 0.66101 ± 0.00094 | 0.70305 ± 0.00368 |
+| OpenRec FM + content | 42/43/44 | 0.75687 ± 0.00005 | 0.56218 ± 0.00012 | 0.66101 ± 0.00094 | 0.70305 ± 0.00368 |
+| OpenRec history Transformer + content | 42/43/44 | **0.75846 ± 0.00123** | **0.56184 ± 0.00047** | **0.68197 ± 0.00313** | 0.71264 ± 0.02704 |
 
 The values after `±` are sample standard deviations across seeds. Popularity is
 deterministic and therefore has one run. The content variants add video type,
 upload type, tags, and point-in-time age from the basic video table. They
 exclude user snapshots and aggregate video statistics whose historical
 availability is unknown. Content improves LR by 0.00516 Standard AUC and FM by
-0.00718; FM + content is the strongest model on the standard-policy population.
+0.00718.
+
+KuaiRand has no title, caption, or other suitable natural-language field, so the
+Transformer does not claim a semantic embedding experiment. It encodes the
+available video type, upload type, and anonymous tags with OpenRec's fitted
+structured-content representation. The model attends from each candidate to a
+maximum of 50 earlier Standard-policy clicks, then fuses that sequence signal
+with the same global features used by FM. Histories obey the configured feature
+cutoff, exclude Random-policy observations, and remain frozen at the training
+boundary for validation and test.
+
+The Transformer improves mean Standard AUC over FM + content by 0.00159 and
+reduces LogLoss by 0.00033. It also improves Random AUC by 0.02096, although its
+Random LogLoss is 0.00960 worse and varies substantially across seeds. This is
+evidence that the sequential signal improves ordering on both logged and random
+exposures under this split; the uncalibrated random-policy probabilities should
+not be used directly.
 
 The randomly exposed population gives a more cautious result. LR + content
 loses 0.00217 AUC and adds 0.01711 LogLoss. FM + content gains 0.00178 AUC but

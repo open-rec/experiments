@@ -80,16 +80,41 @@ which prevents accidental replacement of experiment inputs.
   --config studies/baselines/kuairand.json --output runs/kuairand/fm-seed42
 ```
 
-The `model` setting accepts `popularity`, `lr`, or `fm`. The popularity
+The `model` setting accepts `popularity`, `lr`, `fm`, or `transformer`. The popularity
 baseline is a smoothed item click-rate estimate fitted on the training split.
 `studies/baselines/ebnerd-content.json` enables OpenRec's cold-start content
 features (hashed title/topic/subcategory and point-in-time content age) while
 keeping the baseline split, labels and optimizer fixed for a controlled
 ablation. Run it with both `--model lr` and `--model fm` to reproduce the full
 behavior/content model matrix.
+`studies/baselines/ebnerd-semantic.json` replaces the title hash with frozen
+multilingual E5 title vectors for LR/FM. `studies/baselines/ebnerd-transformer.json`
+uses those vectors for both candidates and the official click history, applies
+candidate-aware Transformer attention, and fuses OpenRec's existing global
+features. Generate the ignored embedding artifact with:
+
+```bash
+HF_ENDPOINT=https://hf-mirror.com .venv/bin/python -m openrec_experiments.cli \
+  embed-titles --articles data/raw/ebnerd_small/articles.parquet \
+  --output data/processed/ebnerd-small-title-e5.parquet
+```
+`studies/baselines/ebnerd-body-semantic.json` uses frozen E5 vectors for
+nonempty article bodies and activates the title hash only when the body is
+missing. Generate its ignored artifact with:
+
+```bash
+HF_ENDPOINT=https://hf-mirror.com .venv/bin/python -m openrec_experiments.cli \
+  embed-content --articles data/raw/ebnerd_small/articles.parquet --column body \
+  --output data/processed/ebnerd-small-body-e5.parquet
+```
 `studies/baselines/kuairand-content.json` provides the equivalent controlled
 ablation using static basic video metadata. It deliberately excludes aggregate
-video statistics and static user snapshots.
+video statistics and static user snapshots. KuaiRand has no suitable text field
+for a semantic-language ablation. `studies/baselines/kuairand-transformer.json`
+therefore represents items with OpenRec's structured video type, upload type,
+and tag features, and attends to the last 50 eligible clicks. Random-policy
+clicks never enter history, and frozen evaluation exposes no post-training
+feedback.
 Formal baseline runs use seeds 42, 43, and 44, a separate output directory for
 every run, and a preserved copy of the effective configuration.
 
@@ -116,15 +141,16 @@ Every run produces:
   identities.
 - `learning_curve.json`: validation results for every epoch.
 - `environment.txt`: the effective Python dependency environment.
-- An LR/FM checkpoint and fitted `FeatureSpace`, or popularity parameters.
+- An LR/FM/Transformer checkpoint and fitted `FeatureSpace`, or popularity
+  parameters.
 
 ## Scope and research rules
 
 The full protocol is defined in
 [protocols/baseline-v1.md](protocols/baseline-v1.md). The current implementation
-is an in-memory CPU reference runner. It calls the production feature
-aggregation logic for each time bucket; it is not an incremental feature engine
-or a large-scale training implementation.
+is an in-memory reference runner with optional CUDA training. It calls the
+production feature aggregation logic for each time bucket; it is not an
+incremental feature engine or a large-scale training implementation.
 
 Confirm the memory budget before running the full KuaiRand-1K dataset. Evaluation
 feedback is frozen by default. Delayed replay represents an assumed feedback

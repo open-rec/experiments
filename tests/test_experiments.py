@@ -7,8 +7,16 @@ import pytest
 
 from openrec_experiments.data import ebnerd, kuairand, prepare, validate
 from openrec_experiments.evaluation import binary_metrics, evaluate
-from openrec_experiments.runner import load_openrec, run, split
+from openrec_experiments.runner import (
+    apply_semantic_title_fallback,
+    logged_history_inputs,
+    load_openrec,
+    run,
+    split,
+)
 from openrec_experiments.features import materialize
+from openrec_experiments.provenance import digest, write_json
+from openrec_experiments.semantic import load_embeddings
 
 ROOT = Path(__file__).resolve().parents[2] / "rec-algorithm"
 
@@ -166,6 +174,33 @@ def test_same_timestamp_group_cannot_leak():
     pd.testing.assert_frame_equal(items.iloc[:3], i2.iloc[:3])
 
 
+def test_logged_history_excludes_random_and_frozen_future_clicks():
+    frame = pd.DataFrame({
+        "user_id": ["u", "u", "u", "u"],
+        "timestamp": [100, 200, 300, 1_100],
+        "policy": ["standard", "random", "standard", "standard"],
+        "label": [1, 1, 0, 1],
+    })
+    settings = {
+        "max_history": 2,
+        "update_interval_ms": 1,
+        "feedback_delay_ms": 0,
+        "validation_start": "1970-01-01T00:00:01Z",
+        "evaluation_feedback": "frozen",
+    }
+    item_vectors = np.eye(4, dtype=np.float32)
+    candidate_indices = np.arange(4, dtype=np.int64)
+    vectors, masks, indices = logged_history_inputs(
+        frame, settings, item_vectors, candidate_indices
+    )
+
+    assert masks[indices[0]].all()
+    np.testing.assert_array_equal(vectors[indices[2], -1], item_vectors[0])
+    np.testing.assert_array_equal(vectors[indices[3], -1], item_vectors[0])
+    assert not np.any(np.all(vectors == item_vectors[1], axis=2))
+    assert not np.any(np.all(vectors == item_vectors[3], axis=2))
+
+
 @pytest.mark.parametrize("model", ["popularity", "lr", "fm"])
 def test_prepare_train_evaluate_artifacts(tmp_path, model):
     behaviors, articles = raw_ebnerd()
@@ -200,6 +235,33 @@ def test_split_rejects_ambiguous_timezone():
     settings["train_start"] = "2023-05-18"
     with pytest.raises(ValueError, match="UTC offset"):
         split(ebnerd(*raw_ebnerd()), settings)
+
+
+def test_semantic_embedding_artifact_is_validated(tmp_path):
+    path = tmp_path / "semantic.parquet"
+    pd.DataFrame({"article_id": ["10", "20"],
+                  "embedding": [np.array([1, 0], dtype=np.float32),
+                                np.array([0, 1], dtype=np.float32)]}).to_parquet(path)
+    write_json(str(path) + ".manifest.json", {
+        "rows": 2, "dimension": 2, "output_sha256": digest(path)
+    })
+    ids, matrix, present, manifest = load_embeddings(path)
+    assert ids.tolist() == ["10", "20"]
+    assert matrix.shape == (2, 2)
+    assert present.tolist() == [True, True]
+    assert manifest["dimension"] == 2
+    path.write_bytes(b"tampered")
+    with pytest.raises(ValueError, match="manifest"):
+        load_embeddings(path)
+
+
+def test_semantic_content_uses_title_hash_only_as_missing_fallback():
+    items = pd.DataFrame({"title": ["has body", "title fallback", "also has body"]})
+    result = apply_semantic_title_fallback(
+        items, np.array([True, False]), np.array([0, 1, 0])
+    )
+    assert result.title.tolist() == ["", "title fallback", ""]
+    assert items.title.tolist() == ["has body", "title fallback", "also has body"]
 
 
 def test_kuairand_csv_end_to_end_and_data_tamper(tmp_path):

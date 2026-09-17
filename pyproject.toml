@@ -11,6 +11,7 @@ dependencies = ["numpy>=1.26,<3", "pandas>=2.1,<4", "pyarrow>=14,<24", "scikit-l
 
 [project.optional-dependencies]
 test = ["pytest>=8,<10"]
+semantic = ["sentence-transformers>=3,<6"]
 
 [project.scripts]
 openrec-experiment = "openrec_experiments.cli:main"

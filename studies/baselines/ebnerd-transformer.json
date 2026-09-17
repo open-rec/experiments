@@ -1,0 +1,30 @@
+{
+  "dataset": "ebnerd",
+  "data": "data/processed/ebnerd-small-content.parquet",
+  "openrec_algorithm": "../rec-algorithm",
+  "model": "transformer",
+  "seed": 42,
+  "epochs": 5,
+  "batch_size": 2048,
+  "learning_rate": 0.0005,
+  "threads": 4,
+  "device": "cuda",
+  "content_features": true,
+  "semantic_embeddings": "data/processed/ebnerd-small-title-e5.parquet",
+  "history_files": [
+    "data/raw/ebnerd_small/train/history.parquet",
+    "data/raw/ebnerd_small/validation/history.parquet"
+  ],
+  "max_history": 50,
+  "model_dim": 128,
+  "num_heads": 4,
+  "num_layers": 2,
+  "dropout": 0.1,
+  "train_start": "2023-05-18T07:00:00Z",
+  "validation_start": "2023-05-22T07:00:00Z",
+  "test_start": "2023-05-25T07:00:00Z",
+  "test_end": "2023-06-01T07:00:00Z",
+  "update_interval_ms": 86400000,
+  "feedback_delay_ms": 3600000,
+  "evaluation_feedback": "frozen"
+}
