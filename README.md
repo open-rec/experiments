@@ -61,7 +61,7 @@ files are resolved from the current working directory.
 
 ```bash
 .venv/bin/python -m openrec_experiments.cli prepare \
-  --config datasets/ebnerd/prepare.json --output data/processed/ebnerd-small.parquet
+  --config datasets/ebnerd/prepare.json --output data/processed/ebnerd-small-content.parquet
 .venv/bin/python -m openrec_experiments.cli prepare \
   --config datasets/kuairand/prepare.json --output data/processed/kuairand-1k.parquet
 ```
@@ -83,6 +83,10 @@ which prevents accidental replacement of experiment inputs.
 
 The `model` setting accepts `popularity`, `lr`, or `fm`. The popularity
 baseline is a smoothed item click-rate estimate fitted on the training split.
+`studies/baselines/ebnerd-content.json` enables OpenRec's cold-start content
+features (hashed title/topic/subcategory and point-in-time content age) while
+keeping the baseline split, labels and optimizer fixed for a controlled
+ablation.
 Formal baseline runs use seeds 42, 43, and 44, a separate output directory for
 every run, and a preserved copy of the effective configuration.
 

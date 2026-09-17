@@ -9,6 +9,7 @@
   "learning_rate": 0.001,
   "factor_dim": 8,
   "threads": 2,
+  "content_features": true,
   "train_start": "2023-05-18T07:00:00Z",
   "validation_start": "2023-05-22T07:00:00Z",
   "test_start": "2023-05-25T07:00:00Z",

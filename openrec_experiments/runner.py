@@ -115,6 +115,12 @@ def run(config, output):
                          "candidate": ["item.scene", "item.event_count", "item.event_click_rate"]}
             if "category" in items:
                 selection["candidate"].append("item.category")
+            if config.get("content_features"):
+                selection["candidate"] = [
+                    "item.title", "item.category", "item.subcategory",
+                    "item.tags", "item.content_age_hours", "item.scene",
+                    "item.event_count", "item.event_click_rate",
+                ]
             space = FeatureSpace.for_model(model_type, selection=selection)
             space.fit(users[masks["train"]], items[masks["train"]])
             features = np.concatenate([space.transform_users(users), space.transform_items(items)], axis=1).astype("float32")

@@ -63,6 +63,13 @@ FeatureSpace fits on training rows only. Adam/BCE, deterministic CPU execution;
 checkpoint selection uses validation LogLoss. Do not select seeds/configurations
 using test metrics. Popularity uses only training labels with prior smoothing 10.
 
+The EB-NeRD content ablation adds the item schema's title, topic tags,
+subcategory and publication time. Text and unbounded multi-value fields use the
+fixed-width signed BLAKE2b feature hash persisted by OpenRec FeatureSpace;
+`content_age_hours` is calculated from publication time at each impression time.
+No full-period article engagement statistics are used. The same content
+materializer and fitted sidecar are consumed by offline training and rank-engine.
+
 ## Evaluation
 
 Global AUC and LogLoss are named separately from impression-macro AUC.

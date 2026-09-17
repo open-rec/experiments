@@ -44,11 +44,31 @@ def ebnerd(behaviors, articles):
             if item not in metadata.index:
                 raise ValueError("candidate missing article metadata")
             article = metadata.loc[item]
+            subcategory = article.get("subcategory", [])
+            topics = article.get("topics", [])
+            subcategory = (
+                ",".join(str(value) for value in subcategory)
+                if isinstance(subcategory, (list, tuple, np.ndarray))
+                else str(subcategory or "")
+            )
+            tags = (
+                ",".join(str(value) for value in topics)
+                if isinstance(topics, (list, tuple, np.ndarray))
+                else str(topics or "")
+            )
+            published = pd.Timestamp(article.get("published_time"))
+            pub_time = 0 if pd.isna(published) else int(
+                (published.tz_localize("UTC") if published.tzinfo is None else
+                 published.tz_convert("UTC")).timestamp()
+            )
             rows.append({"sample_id": f"{row['impression_id']}:{item}",
                          "group_id": str(row["impression_id"]), "user_id": str(row["user_id"]),
                          "item_id": str(item), "timestamp": timestamp.value // 1_000_000,
                          "label": int(item in clicks), "policy": "observed", "scene": "news",
                          "position": position, "category": str(article["category"]),
+                         "subcategory": subcategory, "tags": tags,
+                         "title": str(article.get("title", "") or ""),
+                         "pub_time": pub_time,
                          "age": row.get("age", np.nan)})
     result = pd.DataFrame(rows)
     validate(result)

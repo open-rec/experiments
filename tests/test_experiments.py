@@ -28,7 +28,14 @@ def raw_ebnerd():
          "article_ids_inview": [10, 20, 30], "article_ids_clicked": [10 if i % 2 else 20]}
         for i in range(8)
     ])
-    articles = pd.DataFrame({"article_id": [10, 20, 30], "category": [1, 2, 3]})
+    articles = pd.DataFrame({
+        "article_id": [10, 20, 30],
+        "category": [1, 2, 3],
+        "subcategory": [[11], [21, 22], []],
+        "topics": [["local"], ["sport"], ["culture"]],
+        "title": ["First article", "Second article", "Third article"],
+        "published_time": [pd.Timestamp("2023-05-17T12:00:00")] * 3,
+    })
     return behaviors, articles
 
 
@@ -42,6 +49,10 @@ def test_ebnerd_retains_groups_and_candidates():
     group_sets = [set(frame[m].group_id) for m in masks.values()]
     assert not group_sets[0] & group_sets[1]
     assert not group_sets[1] & group_sets[2]
+    assert set(frame[frame.item_id.eq("20")].subcategory) == {"21,22"}
+    assert set(frame[frame.item_id.eq("20")].tags) == {"sport"}
+    assert frame.title.str.len().gt(0).all()
+    assert frame.pub_time.gt(0).all()
 
 
 def test_bad_candidates_and_unlabeled_test_fail():
@@ -109,6 +120,8 @@ def test_features_ignore_same_time_and_future_labels():
     users, items = materialize(frame, settings)
     assert items.iloc[:6].event_count.eq(0).all()
     assert users.iloc[:6].event_count.eq(0).all()
+    assert items.iloc[:3].content_age_hours.eq(24).all()
+    assert items.title.str.len().gt(0).all()
     changed = frame.copy()
     changed.loc[changed.timestamp.ge(pd.Timestamp(settings["validation_start"]).value // 1000000), "label"] ^= 1
     u2, i2 = materialize(changed, settings)
