@@ -1,0 +1,26 @@
+name: experiments
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: experiments
+      - uses: actions/checkout@v4
+        with:
+          repository: open-rec/rec-algorithm
+          ref: 496f2c964eaa9456d98846615f1ff5740bae397d
+          path: rec-algorithm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test runtime
+        working-directory: experiments
+        run: python -m pip install --index-url https://mirrors.aliyun.com/pypi/simple/ -e '.[test]'
+      - name: Unit and synthetic integration tests
+        working-directory: experiments
+        run: python -m pytest -q

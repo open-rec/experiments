@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Research artifacts (never commit licensed data or checkpoints)
+/data/
+/runs/
+/artifacts/
+/.venv/

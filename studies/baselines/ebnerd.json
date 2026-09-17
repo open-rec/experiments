@@ -1,0 +1,19 @@
+{
+  "dataset": "ebnerd",
+  "data": "data/processed/ebnerd-small.parquet",
+  "openrec_algorithm": "../rec-algorithm",
+  "model": "fm",
+  "seed": 42,
+  "epochs": 10,
+  "batch_size": 1024,
+  "learning_rate": 0.001,
+  "factor_dim": 8,
+  "threads": 2,
+  "train_start": "2023-05-18T00:00:00Z",
+  "validation_start": "2023-05-22T00:00:00Z",
+  "test_start": "2023-05-25T00:00:00Z",
+  "test_end": "2023-06-01T00:00:00Z",
+  "update_interval_ms": 86400000,
+  "feedback_delay_ms": 3600000,
+  "evaluation_feedback": "frozen"
+}
