@@ -219,6 +219,8 @@ def run(config, output):
                     "item.tags", "item.content_age_hours", "item.scene",
                     "item.event_count", "item.event_click_rate",
                 ]
+            if config.get("feature_selection"):
+                selection = config["feature_selection"]
             semantic_matrix = semantic_present = candidate_indices = semantic_manifest = None
             semantic_ids = None
             if config.get("semantic_embeddings"):

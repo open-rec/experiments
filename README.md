@@ -118,6 +118,15 @@ feedback.
 Formal baseline runs use seeds 42, 43, and 44, a separate output directory for
 every run, and a preserved copy of the effective configuration.
 
+The large-to-small scale experiment uses
+`datasets/ebnerd/prepare-large-to-small.json` and
+`studies/baselines/ebnerd-large-to-small-fm.json`. Its prepared data and large
+embedding artifact may be stored on a larger filesystem and exposed through
+ignored links at `data/processed/ebnerd-large-to-small.parquet` and
+`data/processed/ebnerd-large-body-e5.parquet`. It trains on every large-train
+impression with all clicks plus one deterministic negative, then predicts every
+candidate in small validation.
+
 The dates in the sample configurations define a local temporal holdout and must
 be checked against the acquired dataset version before the first real-data run.
 For EB-NeRD, the official validation data acts as the local test split and the

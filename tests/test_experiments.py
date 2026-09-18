@@ -5,7 +5,14 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from openrec_experiments.data import ebnerd, kuairand, prepare, validate
+from openrec_experiments.data import (
+    _article_metadata,
+    _project_behavior_batch,
+    ebnerd,
+    kuairand,
+    prepare,
+    validate,
+)
 from openrec_experiments.evaluation import binary_metrics, evaluate
 from openrec_experiments.runner import (
     apply_semantic_title_fallback,
@@ -68,6 +75,19 @@ def test_bad_candidates_and_unlabeled_test_fail():
     behaviors.at[0, "article_ids_clicked"] = [999]
     with pytest.raises(ValueError, match="candidate"):
         ebnerd(behaviors, articles)
+
+
+def test_large_scale_projection_keeps_all_clicks_and_one_stable_negative():
+    behaviors, articles = raw_ebnerd()
+    metadata = _article_metadata(articles)
+    assert metadata.pub_time.eq(1_684_324_800).all()
+    sampled = _project_behavior_batch(behaviors.iloc[:2], metadata, True)
+    repeated = _project_behavior_batch(behaviors.iloc[:2], metadata, True)
+    full = _project_behavior_batch(behaviors.iloc[:2], metadata, False)
+    assert sampled.groupby("group_id").size().eq(2).all()
+    assert sampled.groupby("group_id").label.sum().eq(1).all()
+    assert sampled.sample_id.tolist() == repeated.sample_id.tolist()
+    assert full.groupby("group_id").size().eq(3).all()
     behaviors.at[0, "article_ids_clicked"] = None
     with pytest.raises(ValueError, match="labeled"):
         ebnerd(behaviors, articles)

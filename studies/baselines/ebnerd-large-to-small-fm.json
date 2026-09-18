@@ -1,0 +1,26 @@
+{
+  "dataset": "ebnerd",
+  "data": "data/processed/ebnerd-large-to-small.parquet",
+  "openrec_algorithm": "../rec-algorithm",
+  "model": "fm",
+  "seed": 42,
+  "epochs": 5,
+  "batch_size": 16384,
+  "learning_rate": 0.001,
+  "factor_dim": 8,
+  "threads": 16,
+  "device": "cuda",
+  "semantic_embeddings": "data/processed/ebnerd-large-body-e5.parquet",
+  "semantic_fallback_title_hash": true,
+  "feature_selection": {
+    "user": ["user.age"],
+    "candidate": ["item.title", "item.category", "item.subcategory", "item.tags", "item.scene"]
+  },
+  "train_start": "2023-05-18T07:00:00Z",
+  "validation_start": "2023-05-24T07:00:00Z",
+  "test_start": "2023-05-25T07:00:00Z",
+  "test_end": "2023-06-01T07:00:00Z",
+  "update_interval_ms": 86400000,
+  "feedback_delay_ms": 3600000,
+  "evaluation_feedback": "frozen"
+}

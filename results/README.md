@@ -12,3 +12,8 @@ The EB-NeRD-small summary also includes a clearly separated validation reference
 from the supplied RecSys Challenge 2024 first-place source tree. External rows
 are not added to the run-derived CSV and are not treated as protocol-matched
 OpenRec experiments.
+
+`ebnerd-large-to-small-v1.md` records the separate scale experiment that trains
+on the large population with deterministic negative sampling and predicts the
+complete small validation candidate sets. Its protocol differences are stated
+next to the result and it is not merged into the baseline-v1 comparison table.
