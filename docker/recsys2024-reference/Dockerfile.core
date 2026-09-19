@@ -1,0 +1,11 @@
+FROM openrec/experiments-gpu:local
+
+ARG PIP_INDEX_URL=https://mirrors.aliyun.com/pypi/simple
+
+RUN /opt/conda/bin/python -m pip install --no-cache-dir \
+    --index-url "${PIP_INDEX_URL}" \
+    numpy==1.26.4 \
+    hydra-core==1.3.2 omegaconf==2.3.0 invoke==2.2.0 \
+    polars==0.20.19 lightgbm==4.3.0 catboost==1.2.3 \
+    gcsfs==2024.3.1 cloudpathlib==0.16.0 implicit==0.7.2 \
+    wandb==0.16.6 psutil pyyaml

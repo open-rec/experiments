@@ -11,7 +11,7 @@ def main():
         sub.add_argument("--config", required=True, type=Path)
         sub.add_argument("--output", required=True, type=Path)
         if name == "run":
-            sub.add_argument("--model", choices=["popularity", "lr", "fm", "transformer"])
+            sub.add_argument("--model", choices=["popularity", "lr", "fm", "lightgbm", "transformer"])
             sub.add_argument("--seed", type=int)
     summary = commands.add_parser("report")
     summary.add_argument("--runs", nargs="+", required=True, type=Path)
@@ -21,12 +21,6 @@ def main():
     embedding.add_argument("--output", required=True, type=Path)
     embedding.add_argument("--model", default="intfloat/multilingual-e5-small")
     embedding.add_argument("--batch-size", type=int, default=256)
-    content_embedding = commands.add_parser("embed-content")
-    content_embedding.add_argument("--articles", required=True, type=Path)
-    content_embedding.add_argument("--output", required=True, type=Path)
-    content_embedding.add_argument("--column", default="body")
-    content_embedding.add_argument("--model", default="intfloat/multilingual-e5-small")
-    content_embedding.add_argument("--batch-size", type=int, default=64)
     args = parser.parse_args()
     if args.command == "report":
         from .report import report
@@ -35,12 +29,6 @@ def main():
     if args.command == "embed-titles":
         from .semantic import embed_titles
         embed_titles(args.articles, args.output, args.model, args.batch_size)
-        return
-    if args.command == "embed-content":
-        from .semantic import embed_article_text
-        embed_article_text(
-            args.articles, args.output, args.model, args.column, args.batch_size
-        )
         return
     config = json.loads(args.config.read_text())
     if args.command == "prepare":

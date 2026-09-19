@@ -16,6 +16,14 @@ from openrec_experiments.data import (
 from openrec_experiments.evaluation import binary_metrics, evaluate
 from openrec_experiments.runner import (
     apply_semantic_title_fallback,
+    contextual_features,
+    interaction_features,
+    relative_temporal_features,
+    long_term_user_features,
+    candidate_statistical_ranks,
+    session_exposure_features,
+    past_candidate_exposure_features,
+    past_candidate_engagement_features,
     logged_history_inputs,
     load_openrec,
     run,
@@ -68,6 +76,104 @@ def test_ebnerd_retains_groups_and_candidates():
     assert set(frame[frame.item_id.eq("20")].tags) == {"sport"}
     assert frame.title.str.len().gt(0).all()
     assert frame.pub_time.gt(0).all()
+    assert frame.groupby("group_id").candidate_count.nunique().eq(1).all()
+    assert frame.position.ge(0).all()
+
+
+def test_contextual_features_are_label_independent_and_train_fitted():
+    frame = ebnerd(*raw_ebnerd())
+    mask = frame.timestamp.lt(frame.timestamp.sort_values().iloc[len(frame) // 2])
+    first, names = contextual_features(frame, mask)
+    changed = frame.copy()
+    changed["label"] ^= 1
+    second, repeated = contextual_features(changed, mask)
+    assert names == repeated
+    assert names[:3] == ["context.position", "context.candidate_count", "context.position_ratio"]
+    np.testing.assert_array_equal(first, second)
+
+
+def test_interaction_features_only_use_visible_clicks():
+    frame = ebnerd(*raw_ebnerd()).sort_values(["timestamp", "sample_id"]).reset_index(drop=True)
+    settings = config()
+    settings.update(update_interval_ms=1, feedback_delay_ms=0,
+                    evaluation_feedback="delayed_replay")
+    values, names = interaction_features(frame, settings)
+    assert len(names) == values.shape[1] == 4
+    first_time = frame.timestamp.min()
+    assert not values[frame.timestamp.eq(first_time), 3].any()
+    changed = frame.copy()
+    changed.loc[changed.timestamp.ge(pd.Timestamp(settings["validation_start"]).value // 1_000_000), "label"] ^= 1
+    frozen = dict(settings, evaluation_feedback="frozen")
+    first, _ = interaction_features(frame, frozen)
+    second, _ = interaction_features(changed, frozen)
+    np.testing.assert_array_equal(first, second)
+
+
+def test_relative_temporal_features_are_group_local_and_label_free():
+    frame = ebnerd(*raw_ebnerd())
+    values, names = relative_temporal_features(frame)
+    assert values.shape == (len(frame), 4)
+    assert names[1] == "temporal.freshness_rank_ratio"
+    assert ((values[:, 1] >= 0) & (values[:, 1] <= 1)).all()
+    changed = frame.copy()
+    changed["label"] ^= 1
+    np.testing.assert_array_equal(values, relative_temporal_features(changed)[0])
+
+
+def test_long_term_user_profile_is_frozen_and_finite():
+    frame = ebnerd(*raw_ebnerd()).sort_values(["timestamp", "sample_id"]).reset_index(drop=True)
+    settings = config()
+    values, names = long_term_user_features(frame, settings)
+    assert values.shape == (len(frame), 9) and len(names) == 9
+    assert np.isfinite(values).all()
+    changed = frame.copy()
+    changed.loc[changed.timestamp.ge(pd.Timestamp(settings["validation_start"]).value // 1_000_000), "label"] ^= 1
+    np.testing.assert_array_equal(values, long_term_user_features(changed, settings)[0])
+
+
+def test_candidate_statistical_ranks_are_request_local():
+    frame = ebnerd(*raw_ebnerd())
+    raw = np.tile([3.0, 2.0, 1.0], len(frame) // 3)
+    values, names = candidate_statistical_ranks(frame, {"signal": raw})
+    assert names == ["context.signal_rank_pct", "context.signal_minus_request_mean"]
+    np.testing.assert_allclose(values[:3, 0], [1 / 3, 2 / 3, 1])
+    np.testing.assert_allclose(values[:3, 1], [1, 0, -1])
+
+
+def test_session_exposure_features_use_only_previous_impressions():
+    frame = ebnerd(*raw_ebnerd()).sort_values(["timestamp", "sample_id"]).reset_index(drop=True)
+    values, names = session_exposure_features(frame)
+    assert values.shape == (len(frame), 8) and len(names) == 8
+    first = frame.groupby("user_id", sort=False).head(3).index
+    assert not values[first, 3:].any()
+
+
+def test_past_candidate_exposures_exclude_simultaneous_requests():
+    frame = ebnerd(*raw_ebnerd()).sort_values(
+        ["timestamp", "sample_id"]
+    ).reset_index(drop=True)
+    values, names = past_candidate_exposure_features(frame)
+    assert values.shape == (len(frame), 18) and len(names) == 18
+    first_time = frame.timestamp.min()
+    assert not values[frame.timestamp.eq(first_time), 0].any()
+    later = frame.timestamp.gt(first_time) & frame.item_id.eq("10")
+    assert values[later, 6].max() > 0
+    extended, extended_names = past_candidate_exposure_features(frame, True)
+    assert extended.shape == (len(frame), 32) and len(extended_names) == 32
+
+
+def test_past_candidate_engagement_excludes_current_feedback():
+    frame = ebnerd(*raw_ebnerd()).sort_values(
+        ["timestamp", "sample_id"]
+    ).reset_index(drop=True)
+    frame["read_time"] = 30.0
+    frame["scroll_percentage"] = 100.0
+    values, names = past_candidate_engagement_features(frame)
+    assert values.shape == (len(frame), 18) and len(names) == 18
+    first_time = frame.timestamp.min()
+    assert not values[frame.timestamp.eq(first_time), 0].any()
+    later = frame.timestamp.gt(first_time) & frame.item_id.eq("10")
+    assert values[later, 6].max() > 0
 
 
 def test_bad_candidates_and_unlabeled_test_fail():
@@ -79,6 +185,9 @@ def test_bad_candidates_and_unlabeled_test_fail():
 
 def test_large_scale_projection_keeps_all_clicks_and_one_stable_negative():
     behaviors, articles = raw_ebnerd()
+    behaviors["read_time"] = 30.0
+    behaviors["scroll_percentage"] = 100.0
+    behaviors["session_id"] = "session"
     metadata = _article_metadata(articles)
     assert metadata.pub_time.eq(1_684_324_800).all()
     sampled = _project_behavior_batch(behaviors.iloc[:2], metadata, True)
@@ -88,6 +197,8 @@ def test_large_scale_projection_keeps_all_clicks_and_one_stable_negative():
     assert sampled.groupby("group_id").label.sum().eq(1).all()
     assert sampled.sample_id.tolist() == repeated.sample_id.tolist()
     assert full.groupby("group_id").size().eq(3).all()
+    assert {"read_time", "scroll_percentage", "session_id"}.issubset(sampled.columns)
+    assert sampled.read_time.notna().all()
     behaviors.at[0, "article_ids_clicked"] = None
     with pytest.raises(ValueError, match="labeled"):
         ebnerd(behaviors, articles)

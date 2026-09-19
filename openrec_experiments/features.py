@@ -24,7 +24,19 @@ def materialize(frame, config):
         history["time"] = history.timestamp // 1000
         history["type"] = np.where(history.label.eq(1), "click", "expose")
         history["event_id"] = history.sample_id
-        history["value"] = 0.0
+        # Map dataset feedback onto OpenRec Event.value. EB-NeRD records dwell at
+        # impression level, so divide it over candidates exactly as the existing
+        # causal engagement feature does. Other datasets fall back to zero.
+        if {"read_time", "scroll_percentage", "candidate_count"}.issubset(history):
+            valid = history.scroll_percentage.notna()
+            history["value"] = np.where(
+                valid,
+                pd.to_numeric(history.read_time, errors="coerce").fillna(0).clip(lower=0)
+                / pd.to_numeric(history.candidate_count, errors="coerce").fillna(1).clip(lower=1),
+                0.0,
+            )
+        else:
+            history["value"] = 0.0
     cutoffs = (frame.timestamp // interval) * interval - delay
     if config["evaluation_feedback"] == "frozen":
         cutoffs = cutoffs.clip(upper=train_end - delay)
@@ -43,12 +55,25 @@ def materialize(frame, config):
     # Recompute with the product implementation for correctness. This reference
     # materializer is intentionally not a claim of incremental scalability.
     if needs_behavior:
+        selected_columns = {
+            entity: [
+                feature.split(".", 1)[1]
+                for feature in selected.get(
+                    "user" if entity == "user" else "candidate", []
+                )
+                if feature.startswith(entity + ".event_")
+            ]
+            for entity in ("user", "item")
+        }
         for cutoff, index in cutoffs.groupby(cutoffs).groups.items():
             visible = history[history.timestamp < cutoff]
             for entity, destination in [("user", users), ("item", items)]:
                 aggregate = aggregate_event_features(visible, entity, as_of_time=cutoff // 1000)
                 aggregate = aggregate.set_index(f"{entity}_id")
-                for column in ["event_count", "event_click_rate"]:
+                columns = selected_columns[entity] or [
+                    "event_count", "event_click_rate"
+                ]
+                for column in columns:
                     destination.loc[index, column] = destination.loc[index, "id"].map(aggregate[column]).fillna(0)
     if "pub_time" in items:
         from algorithm.feature.content_feature import enrich_item_content_features

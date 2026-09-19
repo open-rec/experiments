@@ -1,0 +1,25 @@
+services:
+  reference:
+    image: openrec/recsys2024-reference:local
+    build:
+      context: .
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://mirrors.aliyun.com/pypi/simple}
+    working_dir: /workspace/reference
+    stdin_open: true
+    tty: true
+    shm_size: 32gb
+    environment:
+      WANDB_MODE: offline
+      TOKENIZERS_PARALLELISM: "false"
+    volumes:
+      - ${RECSYS2024_SOURCE}:/workspace/reference:ro
+      - ${EBNERD_DATA_ROOT}:/kaggle/working/input:ro
+      - ${RECSYS2024_OUTPUT_ROOT}:/kaggle/working/output
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

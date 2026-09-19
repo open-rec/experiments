@@ -80,7 +80,7 @@ which prevents accidental replacement of experiment inputs.
   --config studies/baselines/kuairand.json --output runs/kuairand/fm-seed42
 ```
 
-The `model` setting accepts `popularity`, `lr`, `fm`, or `transformer`. The popularity
+The `model` setting accepts `popularity`, `lr`, `fm`, `lightgbm`, or `transformer`. The popularity
 baseline is a smoothed item click-rate estimate fitted on the training split.
 `studies/baselines/ebnerd-content.json` enables OpenRec's cold-start content
 features (hashed title/topic/subcategory and point-in-time content age) while
@@ -98,15 +98,6 @@ HF_ENDPOINT=https://hf-mirror.com .venv/bin/python -m openrec_experiments.cli \
   embed-titles --articles data/raw/ebnerd_small/articles.parquet \
   --output data/processed/ebnerd-small-title-e5.parquet
 ```
-`studies/baselines/ebnerd-body-semantic.json` uses frozen E5 vectors for
-nonempty article bodies and activates the title hash only when the body is
-missing. Generate its ignored artifact with:
-
-```bash
-HF_ENDPOINT=https://hf-mirror.com .venv/bin/python -m openrec_experiments.cli \
-  embed-content --articles data/raw/ebnerd_small/articles.parquet --column body \
-  --output data/processed/ebnerd-small-body-e5.parquet
-```
 `studies/baselines/kuairand-content.json` provides the equivalent controlled
 ablation using static basic video metadata. It deliberately excludes aggregate
 video statistics and static user snapshots. KuaiRand has no suitable text field
@@ -118,14 +109,10 @@ feedback.
 Formal baseline runs use seeds 42, 43, and 44, a separate output directory for
 every run, and a preserved copy of the effective configuration.
 
-The large-to-small scale experiment uses
-`datasets/ebnerd/prepare-large-to-small.json` and
-`studies/baselines/ebnerd-large-to-small-fm.json`. Its prepared data and large
-embedding artifact may be stored on a larger filesystem and exposed through
-ignored links at `data/processed/ebnerd-large-to-small.parquet` and
-`data/processed/ebnerd-large-body-e5.parquet`. It trains on every large-train
-impression with all clicks plus one deterministic negative, then predicts every
-candidate in small validation.
+The earlier body-embedding and large-to-small body-embedding runs remain in the
+results directory as historical evidence, but their active study configurations
+and embedding command have been removed. EB-NeRD body coverage and measured
+gain did not justify carrying that feature into the production roadmap.
 
 The dates in the sample configurations define a local temporal holdout and must
 be checked against the acquired dataset version before the first real-data run.
@@ -175,6 +162,9 @@ the same protocol against strong baselines on an untouched test set.
 Reviewable summaries from completed real-data runs are published under
 [results](results/README.md). Each summary states its protocol and maturity;
 preliminary local results are kept separate from official leaderboard claims.
+The feature-engineering path that raises the causal EB-NeRD LightGBM baseline
+from 0.680 to 0.822 impression-macro AUC is documented in
+[EB-NeRD ranking optimization](docs/EBNERD_OPTIMIZATION.md).
 
 ## Exporting result tables
 

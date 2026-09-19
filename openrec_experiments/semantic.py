@@ -9,7 +9,7 @@ import pandas as pd
 from .provenance import digest, write_json
 
 
-def embed_article_text(articles_path, output, model_name, text_column, batch_size=256):
+def _embed_article_text(articles_path, output, model_name, text_column, batch_size=256):
     output = Path(output)
     if output.exists():
         raise FileExistsError(output)
@@ -49,7 +49,7 @@ def embed_article_text(articles_path, output, model_name, text_column, batch_siz
 
 
 def embed_titles(articles_path, output, model_name, batch_size=256):
-    return embed_article_text(
+    return _embed_article_text(
         articles_path, output, model_name, "title", batch_size
     )
 

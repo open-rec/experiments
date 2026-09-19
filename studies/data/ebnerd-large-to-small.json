@@ -1,0 +1,8 @@
+{
+  "dataset": "ebnerd",
+  "protocol": "large_train_small_test_v1",
+  "large_train_behaviors": "data/raw/ebnerd_large/train/behaviors.parquet",
+  "small_test_behaviors": "data/raw/ebnerd_small/validation/behaviors.parquet",
+  "articles": "data/raw/ebnerd_large/articles.parquet",
+  "projection_batch_size": 50000
+}

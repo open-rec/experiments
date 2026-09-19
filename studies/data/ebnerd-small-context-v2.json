@@ -1,0 +1,8 @@
+{
+  "dataset": "ebnerd",
+  "inputs": [
+    "data/raw/ebnerd_small/train/behaviors.parquet",
+    "data/raw/ebnerd_small/validation/behaviors.parquet",
+    "data/raw/ebnerd_small/articles.parquet"
+  ]
+}

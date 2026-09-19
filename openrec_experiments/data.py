@@ -68,7 +68,14 @@ def ebnerd(behaviors, articles):
                          "group_id": str(row["impression_id"]), "user_id": str(row["user_id"]),
                          "item_id": str(item), "timestamp": timestamp.value // 1_000_000,
                          "label": int(item in clicks), "policy": "observed", "scene": "news",
-                         "position": position, "category": str(article["category"]),
+                         "position": position, "candidate_count": len(candidates),
+                         "device_type": str(row.get("device_type", "") or ""),
+                         "is_subscriber": bool(row.get("is_subscriber", False)),
+                         "is_authenticated": bool(row.get("is_sso_user", False)),
+                         "read_time": row.get("read_time", np.nan),
+                         "scroll_percentage": row.get("scroll_percentage", np.nan),
+                         "session_id": str(row.get("session_id", "") or ""),
+                         "category": str(article["category"]),
                          "subcategory": subcategory, "tags": tags,
                          "title": str(article.get("title", "") or ""),
                          "pub_time": pub_time,
@@ -153,6 +160,8 @@ def _project_behavior_batch(behaviors, metadata, sample_negative):
     rows = []
     for row in behaviors.itertuples(index=False):
         candidates = list(row.article_ids_inview)
+        candidate_count = len(candidates)
+        original_positions = {item: position for position, item in enumerate(candidates)}
         clicks = set(row.article_ids_clicked)
         if not candidates or len(candidates) != len(set(candidates)) or not clicks.issubset(candidates):
             raise ValueError("invalid candidate set")
@@ -162,7 +171,7 @@ def _project_behavior_batch(behaviors, metadata, sample_negative):
             candidates = [value for value in candidates if value in retained]
         timestamp = pd.Timestamp(row.impression_time)
         timestamp = timestamp.tz_localize("UTC") if timestamp.tzinfo is None else timestamp.tz_convert("UTC")
-        for position, item in enumerate(candidates):
+        for item in candidates:
             rows.append({
                 "sample_id": f"{row.impression_id}:{item}",
                 "group_id": str(row.impression_id),
@@ -172,7 +181,14 @@ def _project_behavior_batch(behaviors, metadata, sample_negative):
                 "label": int(item in clicks),
                 "policy": "observed",
                 "scene": "news",
-                "position": position,
+                "position": original_positions[item],
+                "candidate_count": candidate_count,
+                "device_type": getattr(row, "device_type", None),
+                "is_subscriber": getattr(row, "is_subscriber", False),
+                "is_authenticated": getattr(row, "is_sso_user", False),
+                "read_time": getattr(row, "read_time", np.nan),
+                "scroll_percentage": getattr(row, "scroll_percentage", np.nan),
+                "session_id": str(getattr(row, "session_id", "") or ""),
                 "age": getattr(row, "age", np.nan),
             })
     result = pd.DataFrame(rows)
@@ -194,7 +210,9 @@ def prepare_ebnerd_large_to_small(config, output):
     metadata = _article_metadata(pd.read_parquet(articles_path))
     columns = [
         "impression_id", "impression_time", "article_ids_inview",
-        "article_ids_clicked", "user_id", "age",
+        "article_ids_clicked", "user_id", "age", "device_type",
+        "is_subscriber", "is_sso_user", "read_time", "scroll_percentage",
+        "session_id",
     ]
     output.parent.mkdir(parents=True, exist_ok=True)
     writer = None
@@ -207,6 +225,15 @@ def prepare_ebnerd_large_to_small(config, output):
             parquet = pq.ParquetFile(path)
             for batch in parquet.iter_batches(batch_size=int(config.get("projection_batch_size", 50_000)), columns=columns):
                 behaviors = batch.to_pandas()
+                if prefix == "large" and int(config.get("large_impression_sample_mod", 1)) > 1:
+                    modulus = int(config["large_impression_sample_mod"])
+                    remainder = int(config.get("large_impression_sample_remainder", 0))
+                    if not 0 <= remainder < modulus:
+                        raise ValueError("large impression sample remainder must be within modulus")
+                    hashes = pd.util.hash_pandas_object(
+                        behaviors["impression_id"], index=False
+                    ).to_numpy(dtype="uint64")
+                    behaviors = behaviors.loc[hashes % modulus == remainder]
                 projected = _project_behavior_batch(behaviors, metadata, sampled)
                 counts[f"{prefix}_impressions"] += len(behaviors)
                 counts[f"{prefix}_samples"] += len(projected)
@@ -226,6 +253,8 @@ def prepare_ebnerd_large_to_small(config, output):
             {"path": str(path), "sha256": digest(path)} for path in sources
         ], "output_sha256": digest(output), **counts,
         "negative_sampling": "all clicks plus one deterministic unclicked candidate per large impression",
+        "large_impression_sample_mod": int(config.get("large_impression_sample_mod", 1)),
+        "large_impression_sample_remainder": int(config.get("large_impression_sample_remainder", 0)),
         "small_test_candidates": "complete",
     })
     return counts

@@ -7,7 +7,7 @@ name = "openrec-experiments"
 version = "0.1.0"
 description = "Reproducible research experiments on the OpenRec engineering stack"
 requires-python = ">=3.10"
-dependencies = ["numpy>=1.26,<3", "pandas>=2.1,<4", "pyarrow>=14,<24", "scikit-learn>=1.4,<2", "torch>=2.2,<3"]
+dependencies = ["numpy>=1.26,<3", "pandas>=2.1,<4", "pyarrow>=14,<24", "scikit-learn>=1.4,<2", "torch>=2.2,<3", "lightgbm>=4.3,<5"]
 
 [project.optional-dependencies]
 test = ["pytest>=8,<10"]

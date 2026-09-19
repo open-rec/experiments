@@ -1,0 +1,57 @@
+{
+  "dataset": "ebnerd",
+  "data": "data/processed/ebnerd-small-content.parquet",
+  "openrec_algorithm": "../rec-algorithm",
+  "model": "lightgbm",
+  "seed": 42,
+  "threads": 8,
+  "feature_selection": {
+    "user": [
+      "user.age",
+      "user.event_count",
+      "user.event_active_days",
+      "user.event_unique_item_count",
+      "user.event_recency_seconds",
+      "user.event_count_1d",
+      "user.event_count_7d",
+      "user.event_count_30d",
+      "user.event_click_count",
+      "user.event_expose_count",
+      "user.event_click_rate"
+    ],
+    "candidate": [
+      "item.title",
+      "item.subcategory",
+      "item.tags",
+      "item.content_age_hours",
+      "item.category",
+      "item.scene",
+      "item.event_count",
+      "item.event_active_days",
+      "item.event_unique_user_count",
+      "item.event_recency_seconds",
+      "item.event_count_1d",
+      "item.event_count_7d",
+      "item.event_count_30d",
+      "item.event_click_count",
+      "item.event_expose_count",
+      "item.event_click_rate"
+    ]
+  },
+  "lightgbm": {
+    "n_estimators": 500,
+    "learning_rate": 0.05,
+    "num_leaves": 63,
+    "min_child_samples": 100,
+    "subsample": 0.9,
+    "colsample_bytree": 0.9,
+    "reg_lambda": 1.0
+  },
+  "train_start": "2023-05-18T07:00:00Z",
+  "validation_start": "2023-05-22T07:00:00Z",
+  "test_start": "2023-05-25T07:00:00Z",
+  "test_end": "2023-06-01T07:00:00Z",
+  "update_interval_ms": 86400000,
+  "feedback_delay_ms": 3600000,
+  "evaluation_feedback": "frozen"
+}
