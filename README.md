@@ -28,12 +28,29 @@ python -m venv .venv
 .venv/bin/python -m pytest -q
 ```
 
-All PyPI downloads use the Aliyun mirror. The runner explicitly loads the
+Local installation commands use the Aliyun mirror; GitHub Actions uses default
+PyPI access. The runner explicitly loads the
 `rec-algorithm` source tree specified by each experiment configuration, verifies
 the actual import path, and records repository commits, working-tree status, a
 diff digest, and environment versions. Versions used in the current workspace
 are listed in `requirements-tested.txt`; this file is not a complete
 cross-platform lock file.
+
+### CI installation
+
+CI follows the rank-engine installation pattern: cache pip downloads, install
+recorded dependencies before the editable project, and upgrade pip first. The
+cache key includes `pyproject.toml` and `requirements-tested.txt`; the latter
+keeps major dependency versions stable without changing the experiment runtime
+to CPU-only PyTorch. CI uses pip's default PyPI index rather than the Aliyun
+mirror. `requirements-tested.txt` contains versions only; local installations
+can select Aliyun with `--index-url` as shown above.
+
+Installation steps have separate names, verbose project-install output, bounded
+network retries and disabled pip version checks. Superseded runs are cancelled.
+These changes reduce repeat downloads and make stalled installation phases easier
+to identify; cold-cache timing and mirror connectivity must be verified on the
+GitHub runner, not inferred from local tests.
 
 Use the Aliyun mirror explicitly when installing an individual package as well:
 
