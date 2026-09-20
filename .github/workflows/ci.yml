@@ -21,7 +21,8 @@ jobs:
       - uses: actions/checkout@v7
         with:
           repository: open-rec/rec-algorithm
-          ref: 496f2c964eaa9456d98846615f1ff5740bae397d
+          # Includes content features, LightGBM and candidate-aware Transformer contracts.
+          ref: 9003733844c4ea84e2024bea8e5631e2ec3bb084
           path: rec-algorithm
       - uses: actions/setup-python@v6
         with:

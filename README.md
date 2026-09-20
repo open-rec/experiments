@@ -38,6 +38,11 @@ cross-platform lock file.
 
 ### CI installation
 
+CI pins `rec-algorithm` to `9003733844c4ea84e2024bea8e5631e2ec3bb084`,
+which includes the content-feature, LightGBM and Transformer modules used by
+the current experiment runner. Use this revision to reproduce CI locally;
+update the pinned revision together with new algorithm-contract dependencies.
+
 CI follows the rank-engine installation pattern: cache pip downloads, install
 recorded dependencies before the editable project, and upgrade pip first. The
 cache key includes `pyproject.toml` and `requirements-tested.txt`; the latter
