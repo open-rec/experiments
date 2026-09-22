@@ -34,16 +34,16 @@ def main():
         report(args.runs, args.output)
         return
     if args.command == "embed-titles":
-        from .semantic import embed_titles
+        from .datasets.ebnerd.semantic import embed_titles
         embed_titles(args.articles, args.output, args.model, args.batch_size)
         return
     if args.command == "official-music":
-        from .official_music import run
+        from .datasets.music_crs_2026.official import run
         config = json.loads(args.config.read_text())
         print(json.dumps(run(config, args.evaluator, args.output), indent=2))
         return
     if args.command == "official-synerise-profiles":
-        from .official_synerise import create_profiles
+        from .datasets.synerise_2025.official import create_profiles
         config = json.loads(args.config.read_text())
         print(json.dumps(create_profiles(config, args.output), indent=2))
         return

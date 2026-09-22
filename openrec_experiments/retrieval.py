@@ -1,18 +1,13 @@
 """Positive-only, full-catalog local retrieval studies using OpenRec recall code."""
 from collections import defaultdict
+import inspect
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
+from .datasets import get_dataset
 from .provenance import digest, git_state, write_json
-
-
-def _utc_ms(values):
-    parsed = pd.to_datetime(values, utc=True, errors="raise")
-    if parsed.isna().any():
-        raise ValueError("missing event timestamp")
-    return parsed.astype("datetime64[ns, UTC]").astype("int64") // 1_000_000
 
 
 def prepare_retrieval(config, output):
@@ -20,49 +15,7 @@ def prepare_retrieval(config, output):
     if output.exists():
         raise FileExistsError(output)
     dataset = config["dataset"]
-    sources = [Path(config["train_events"])]
-    if dataset == "music-crs-2026":
-        sources.extend([Path(config["test_events"]), Path(config["tracks"])])
-        catalog = pd.read_parquet(sources[-1], columns=["track_id"])
-        valid_tracks = set(catalog.track_id.astype(str))
-        rows = []
-        for split, path in [("train", sources[0]), ("test", sources[1])]:
-            sessions = pd.read_parquet(path, columns=[
-                "session_id", "user_id", "session_date", "conversations"
-            ])
-            if sessions.session_id.duplicated().any():
-                raise ValueError("duplicate Music-CRS session_id")
-            for session in sessions.itertuples(index=False):
-                day = pd.Timestamp(session.session_date, tz="UTC")
-                for message in session.conversations:
-                    if message["role"] != "music":
-                        continue
-                    track = str(message["content"])
-                    if track not in valid_tracks:
-                        raise ValueError(f"music track absent from catalog: {track}")
-                    turn = int(message["turn_number"])
-                    rows.append((f"{session.session_id}:{turn}", str(session.session_id),
-                                 str(session.user_id), track, day.value // 1_000_000,
-                                 turn, split))
-        frame = pd.DataFrame(rows, columns=[
-            "event_id", "session_id", "user_id", "item_id", "timestamp", "step", "source_split"
-        ])
-    elif dataset == "synerise-2025":
-        buys = pd.read_parquet(sources[0], columns=["client_id", "sku", "timestamp"])
-        if buys[["client_id", "sku", "timestamp"]].isna().any().any():
-            raise ValueError("null Synerise purchase field")
-        frame = pd.DataFrame({
-            "event_id": [f"buy:{i}" for i in range(len(buys))],
-            "session_id": buys.client_id.astype(str),
-            "user_id": buys.client_id.astype(str),
-            "item_id": buys.sku.astype(str),
-            "timestamp": _utc_ms(buys.timestamp),
-            "source_split": "all",
-        })
-        frame = frame.sort_values(["user_id", "timestamp", "event_id"], kind="stable")
-        frame["step"] = frame.groupby("user_id").cumcount() + 1
-    else:
-        raise ValueError("unknown retrieval dataset")
+    frame, sources = get_dataset(dataset).prepare_events(config)
     if frame.empty or frame.event_id.duplicated().any():
         raise ValueError("empty or duplicate retrieval events")
     frame = frame.sort_values(["timestamp", "session_id", "step", "event_id"], kind="stable")
@@ -77,17 +30,7 @@ def prepare_retrieval(config, output):
 
 
 def _split(frame, config):
-    if config["dataset"] == "music-crs-2026":
-        train = frame.source_split.eq("train")
-        boundary = frame.loc[train, "timestamp"].quantile(float(config.get("train_fraction", 0.8)))
-        labels = np.where(frame.source_split.eq("test"), "test",
-                          np.where(frame.timestamp.lt(boundary), "train", "validation"))
-    else:
-        times = frame.timestamp
-        first = times.quantile(float(config.get("train_fraction", 0.7)))
-        second = times.quantile(float(config.get("validation_fraction", 0.85)))
-        labels = np.where(times.lt(first), "train",
-                          np.where(times.lt(second), "validation", "test"))
+    labels = get_dataset(config["dataset"]).split(frame, config)
     if len(set(labels)) != 3:
         raise ValueError("train, validation and test must all be nonempty")
     return labels
@@ -150,7 +93,7 @@ def _score(recommender, hot_items, queries, k):
 def run_retrieval(config, output):
     """Static train-only recall models; validation/test histories are observed prefixes."""
     import json
-    from .runner import load_openrec
+    from .openrec import load_openrec
 
     output = Path(output)
     if output.exists():
@@ -176,7 +119,7 @@ def run_retrieval(config, output):
     neighbors = i2i.dump_i2i(cut_size=int(config.get("neighbor_size", 50)))
     queries = _queries(
         frame, labels, int(config.get("max_queries_per_split", 0)),
-        strict_timestamps=config["dataset"] == "synerise-2025",
+        strict_timestamps=get_dataset(config["dataset"]).strict_retrieval_timestamps,
     )
     metrics = {
         split: {"hot": _score(None, hot_items, subset, k),
@@ -193,6 +136,8 @@ def run_retrieval(config, output):
         "openrec_git": git_state(root),
         "experiments_git": git_state(Path(__file__).resolve().parents[1]),
         "retrieval_source_sha256": digest(__file__),
+        "dataset_source_sha256": digest(inspect.getfile(
+            get_dataset(config["dataset"]).prepare_events)),
         "train_events": len(train),
         "catalog_items": len(hot_items), "metrics_sha256": digest(output / "metrics.json"),
     })

@@ -13,6 +13,23 @@ feature aggregation, `FeatureSpace`, LR, and FM implementations from
 `rec-algorithm`. Experiment checkpoints use OpenRec model formats but are never
 published to a serving environment automatically.
 
+## Code layout
+
+`openrec_experiments/data.py`, `evaluation.py`, `retrieval.py`, and `runner.py`
+own shared schemas, metrics, recall, and training workflows. Dataset adapters
+live under `openrec_experiments/datasets/`:
+
+| Dataset | Owned code |
+| --- | --- |
+| `ebnerd/` | Impression projection, ranking metrics, article/history features, title embeddings |
+| `kuairand/` | Exposure projection and policy/scene metrics |
+| `music_crs_2026/` | Session projection, split, and official devset evaluation |
+| `synerise_2025/` | Purchase projection, split, and official profile training/comparison |
+
+The CLI commands and configuration files keep their existing names. Historical
+results remain tied to the source revision and digests recorded in their run
+manifests; a refactor does not change those recorded measurements.
+
 ## Installation
 
 Python 3.10 or newer is required; Python 3.12 is recommended. Check out this

@@ -5,16 +5,15 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from openrec_experiments.data import (
+from openrec_experiments.data import prepare, validate
+from openrec_experiments.datasets.ebnerd.data import (
     _article_metadata,
     _project_behavior_batch,
     ebnerd,
-    kuairand,
-    prepare,
-    validate,
 )
+from openrec_experiments.datasets.kuairand.data import kuairand
 from openrec_experiments.evaluation import binary_metrics, evaluate
-from openrec_experiments.runner import (
+from openrec_experiments.datasets.ebnerd.runner_features import (
     apply_semantic_title_fallback,
     contextual_features,
     interaction_features,
@@ -24,12 +23,14 @@ from openrec_experiments.runner import (
     session_exposure_features,
     past_candidate_exposure_features,
     past_candidate_engagement_features,
+)
+from openrec_experiments.runner import (
     logged_history_inputs,
-    load_openrec,
     run,
     split,
 )
 from openrec_experiments.features import materialize
+from openrec_experiments.openrec import load_openrec
 from openrec_experiments.provenance import digest, write_json
 from openrec_experiments.semantic import load_embeddings
 

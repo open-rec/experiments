@@ -57,7 +57,7 @@ PYTHONPATH=/tmp/openrec-synerise-recsys2025 .venv/bin/python -m validator.run \
   --data-dir data/raw/synerise_2025/challenge \
   --embeddings-dir runs/synerise-2025/official-profiles-v1
 OMP_NUM_THREADS=32 MKL_NUM_THREADS=32 .venv/bin/python \
-  -m openrec_experiments.official_synerise_train \
+  -m openrec_experiments.datasets.synerise_2025.train \
   --evaluator /tmp/openrec-synerise-recsys2025 \
   --data-dir data/raw/synerise_2025/challenge \
   --embeddings-dir runs/synerise-2025/official-profiles-v1 \
@@ -86,12 +86,12 @@ PYTHONPATH=/tmp/openrec-synerise-recsys2025 .venv/bin/python \
   -m baseline.aggregated_features_baseline.create_embeddings \
   --data-dir data/raw/synerise_2025/challenge \
   --embeddings-dir runs/synerise-2025/official-baseline-profiles-v1
-.venv/bin/python -m openrec_experiments.official_synerise_align \
+.venv/bin/python -m openrec_experiments.datasets.synerise_2025.align \
   --baseline-profiles runs/synerise-2025/official-baseline-profiles-v1 \
   --relevant-clients data/raw/synerise_2025/challenge/input/relevant_clients.npy \
   --output runs/synerise-2025/official-baseline-aligned-v1
 OMP_NUM_THREADS=32 MKL_NUM_THREADS=32 .venv/bin/python \
-  -m openrec_experiments.official_synerise_train \
+  -m openrec_experiments.datasets.synerise_2025.train \
   --evaluator /tmp/openrec-synerise-recsys2025 \
   --data-dir data/raw/synerise_2025/challenge \
   --embeddings-dir runs/synerise-2025/official-baseline-aligned-v1 \
@@ -101,7 +101,7 @@ OMP_NUM_THREADS=32 MKL_NUM_THREADS=32 .venv/bin/python \
   --accelerator cpu --devices auto \
   --score-dir runs/synerise-2025/official-baseline-scores \
   --hidden-logging-mode
-.venv/bin/python -m openrec_experiments.official_synerise_compare \
+.venv/bin/python -m openrec_experiments.datasets.synerise_2025.compare \
   --openrec-scores runs/synerise-2025/official-task-scores/scores.json \
   --baseline-scores runs/synerise-2025/official-baseline-scores/scores.json \
   --openrec-profiles runs/synerise-2025/official-profiles-v1 \

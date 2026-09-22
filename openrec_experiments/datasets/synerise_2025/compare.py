@@ -8,7 +8,7 @@ import json
 import math
 from pathlib import Path
 
-from .provenance import digest, git_state, write_json
+from ...provenance import digest, git_state, write_json
 
 
 TASKS = (

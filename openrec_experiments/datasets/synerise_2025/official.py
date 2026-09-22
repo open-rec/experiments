@@ -5,8 +5,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from .provenance import digest, git_state, write_json
-from .runner import load_openrec
+from ...provenance import digest, git_state, write_json
+from ...openrec import load_openrec
 
 
 EVENT_TYPES = ("product_buy", "add_to_cart", "remove_from_cart")

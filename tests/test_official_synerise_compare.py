@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from openrec_experiments.official_synerise_compare import TASKS, _load_scores
+from openrec_experiments.datasets.synerise_2025.compare import TASKS, _load_scores
 
 
 def test_merge_official_task_scores_requires_exact_coverage(tmp_path):

@@ -6,8 +6,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from .provenance import digest, git_state, write_json
-from .runner import load_openrec
+from ...provenance import digest, git_state, write_json
+from ...openrec import load_openrec
 
 
 def _score(predictions, ground_truth, catalog_size, evaluator):
