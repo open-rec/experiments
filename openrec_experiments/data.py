@@ -261,6 +261,9 @@ def prepare_ebnerd_large_to_small(config, output):
 
 
 def prepare(config, output):
+    if config.get("task") == "implicit_retrieval_v1":
+        from .retrieval import prepare_retrieval
+        return prepare_retrieval(config, output)
     output = Path(output)
     if output.exists():
         raise FileExistsError(output)

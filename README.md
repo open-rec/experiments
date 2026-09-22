@@ -1,12 +1,14 @@
 # OpenRec Experiments
 
 Reproducible recommender-system research built on OpenRec. The initial datasets
-are **EB-NeRD** and **KuaiRand-1K**. The project first establishes trustworthy
+are **EB-NeRD**, **KuaiRand-1K**, **RecSys 2025 Synerise**, and **RecSys 2026 Music-CRS**. The project first establishes trustworthy
 baselines, then studies training-serving feature consistency, feature freshness,
 and the trade-off between recommendation quality and system cost.
 
-**Current status: preliminary real-data baselines are available; no official
-leaderboard or SOTA claims are available yet.** The first version reuses the
+**Current status: Music-CRS recommendation metrics have been evaluated on the
+official devset; Synerise user profiles have been compared with the organizer's
+example baseline on its official local six-task pipeline. Neither result is an
+official leaderboard submission.** The first version reuses the
 feature aggregation, `FeatureSpace`, LR, and FM implementations from
 `rec-algorithm`. Experiment checkpoints use OpenRec model formats but are never
 published to a serving environment automatically.
@@ -94,6 +96,14 @@ range, and the output digest. Preparation fails if the output already exists,
 which prevents accidental replacement of experiment inputs.
 
 ## Baseline experiments
+
+The two newer datasets have a separate positive-only local retrieval protocol.
+See [Synerise 2025](datasets/synerise_2025/README.md) and
+[Music-CRS 2026](datasets/music_crs_2026/README.md) for acquisition, commands,
+and the limits of comparison with each official challenge. Their runner uses
+OpenRec's `Hot` and `ItemBasedI2I` recall implementations, with train-only
+models and observed prior events as triggers. It reports full train-catalog
+Recall@20 and MRR@20; no unobserved item is labeled a negative exposure.
 
 ```bash
 .venv/bin/python -m openrec_experiments.cli run \

@@ -1,0 +1,11 @@
+{
+  "task": "implicit_retrieval_v1",
+  "dataset": "synerise-2025",
+  "data": "data/processed/synerise-2025-v2.parquet",
+  "openrec_algorithm": "../rec-algorithm",
+  "train_fraction": 0.7,
+  "validation_fraction": 0.85,
+  "k": 20,
+  "neighbor_size": 50,
+  "max_queries_per_split": 5000
+}

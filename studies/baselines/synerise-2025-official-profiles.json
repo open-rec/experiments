@@ -1,0 +1,4 @@
+{
+  "challenge_data_dir": "data/raw/synerise_2025/challenge",
+  "openrec_algorithm": "../rec-algorithm"
+}

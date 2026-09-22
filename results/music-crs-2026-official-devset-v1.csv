@@ -1,0 +1,5 @@
+method,split,ndcg_at_1,ndcg_at_10,ndcg_at_20,catalog_diversity,lexical_diversity,source
+Random,official devset,0.0000,0.0001,0.0001,0.9652,0.0000,official evaluator published scores
+Popularity,official devset,0.0005,0.0018,0.0024,0.0004,0.0000,official evaluator published scores
+LLaMA-1B + BM25,official devset,0.0098,0.0627,0.0815,0.3795,0.2558,official evaluator published scores
+OpenRec Hot + ItemBasedI2I,official devset,0.012125,0.04287967745873413,0.05218237965865201,0.4055150729748678,0.0,local official evaluator run

@@ -8,6 +8,27 @@ Results are preliminary until the protocol document removes its draft status,
 official scorer parity is established, and all declared strong baselines have
 been reproduced.
 
+`music-crs-2026-official-devset-v1.md` compares OpenRec Hot + ItemBasedI2I with
+the organizer's published devset baselines using the same recommendation
+metrics. The official Popularity prediction artifact passes scorer parity.
+
+`synerise-2025-official-local-v1.md` compares OpenRec user profiles with the
+organizer's example aggregated-feature profiles on the same official local
+split and fixed downstream trainer. Its local scores remain separate from the
+published final leaderboard's undisclosed target windows.
+
+`music-crs-2026-retrieval-v1.md` records a separate positive-only OpenRec recall
+study over organizer conversation turns. Its target is the logged music turn,
+not the official challenge's listener-preference and response-quality target.
+
+`synerise-2025-retrieval-v1.md` records the same local OpenRec recall comparison
+on the organizer's raw purchase data. It is separate from the official
+Universal Behavioral Profiles challenge.
+
+Both newer study reports include separately sourced official baseline data.
+The corresponding `datasets/*/official_baselines.csv` files preserve the
+published figures without merging incompatible evaluation protocols.
+
 `kuairand-1k-pit-global-v1.md` reports Popularity, LR, FM, and binary LightGBM
 using only the stable OpenRec global point-in-time feature catalog. Its
 companion CSV preserves per-seed metrics and excludes dataset-specific content

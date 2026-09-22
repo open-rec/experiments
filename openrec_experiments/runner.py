@@ -702,6 +702,9 @@ def past_candidate_engagement_features(frame):
 
 
 def run(config, output):
+    if config.get("task") == "implicit_retrieval_v1":
+        from .retrieval import run_retrieval
+        return run_retrieval(config, output)
     output = Path(output)
     if output.exists():
         raise FileExistsError(output)

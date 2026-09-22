@@ -1,0 +1,5 @@
+dataset,split,method,queries,recall_at_20,mrr_at_20
+synerise-2025,validation,hot,5000,0.0076,0.0016533655027463072
+synerise-2025,validation,openrec_i2i_hot,5000,0.014,0.00433463996787526
+synerise-2025,test,hot,5000,0.0036,0.0008198669751301333
+synerise-2025,test,openrec_i2i_hot,5000,0.006,0.002090295435558594

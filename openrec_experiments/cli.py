@@ -21,6 +21,13 @@ def main():
     embedding.add_argument("--output", required=True, type=Path)
     embedding.add_argument("--model", default="intfloat/multilingual-e5-small")
     embedding.add_argument("--batch-size", type=int, default=256)
+    official_music = commands.add_parser("official-music")
+    official_music.add_argument("--config", required=True, type=Path)
+    official_music.add_argument("--evaluator", required=True, type=Path)
+    official_music.add_argument("--output", required=True, type=Path)
+    official_synerise = commands.add_parser("official-synerise-profiles")
+    official_synerise.add_argument("--config", required=True, type=Path)
+    official_synerise.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     if args.command == "report":
         from .report import report
@@ -29,6 +36,16 @@ def main():
     if args.command == "embed-titles":
         from .semantic import embed_titles
         embed_titles(args.articles, args.output, args.model, args.batch_size)
+        return
+    if args.command == "official-music":
+        from .official_music import run
+        config = json.loads(args.config.read_text())
+        print(json.dumps(run(config, args.evaluator, args.output), indent=2))
+        return
+    if args.command == "official-synerise-profiles":
+        from .official_synerise import create_profiles
+        config = json.loads(args.config.read_text())
+        print(json.dumps(create_profiles(config, args.output), indent=2))
         return
     config = json.loads(args.config.read_text())
     if args.command == "prepare":

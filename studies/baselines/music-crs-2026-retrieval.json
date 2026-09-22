@@ -1,0 +1,10 @@
+{
+  "task": "implicit_retrieval_v1",
+  "dataset": "music-crs-2026",
+  "data": "data/processed/music-crs-2026.parquet",
+  "openrec_algorithm": "../rec-algorithm",
+  "train_fraction": 0.8,
+  "k": 20,
+  "neighbor_size": 50,
+  "max_queries_per_split": 5000
+}

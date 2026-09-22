@@ -221,4 +221,5 @@ __marimo__/
 /data/
 /runs/
 /artifacts/
+/checkpoints/
 /.venv/

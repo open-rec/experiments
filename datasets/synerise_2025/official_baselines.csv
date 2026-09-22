@@ -1,0 +1,2 @@
+source,split,method,borda_count,sum_of_task_scores,churn,propensity_category,propensity_sku,hidden1,hidden2,hidden3
+https://recsys.synerise.com/results/final-leaderboard,final,baseline,143,4.2019,0.6947,0.6985,0.6919,0.6579,0.7382,0.7207

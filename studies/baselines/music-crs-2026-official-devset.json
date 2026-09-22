@@ -1,0 +1,7 @@
+{
+  "train_events": "data/raw/music_crs/train.parquet",
+  "test_events": "data/raw/music_crs/test.parquet",
+  "tracks": "data/raw/music_crs/tracks.parquet",
+  "openrec_algorithm": "../rec-algorithm",
+  "neighbor_size": 50
+}

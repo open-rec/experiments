@@ -1,0 +1,5 @@
+{
+  "task": "implicit_retrieval_v1",
+  "dataset": "synerise-2025",
+  "train_events": "data/raw/synerise_2025/product_buy.parquet"
+}

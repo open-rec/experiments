@@ -1,0 +1,4 @@
+source,split,method,ndcg_at_1,ndcg_at_10,ndcg_at_20,catalog_diversity,lexical_diversity
+https://github.com/nlp4musa/music-crs-evaluator,devset,Random,0.0000,0.0001,0.0001,0.9652,0.0000
+https://github.com/nlp4musa/music-crs-evaluator,devset,Popularity,0.0005,0.0018,0.0024,0.0004,0.0000
+https://github.com/nlp4musa/music-crs-evaluator,devset,LLaMA-1B + BM25,0.0098,0.0627,0.0815,0.3795,0.2558
