@@ -1,0 +1,8 @@
+task,openrec_v1,openrec_v2,official_example_baseline,v2_vs_v1,v2_vs_baseline
+churn,0.7083,0.7084,0.6983,0.0001,0.0101
+propensity_category,0.7409,0.7646,0.7601,0.0237,0.0045
+propensity_sku,0.7446,0.7610,0.7488,0.0164,0.0122
+conversion,0.6758,0.7153,0.7057,0.0395,0.0096
+propensity_new_sku,0.7230,0.7734,0.7109,0.0504,0.0625
+propensity_price,0.7494,0.7720,0.7658,0.0226,0.0062
+sum_of_task_scores,4.3420,4.4947,4.3896,0.1527,0.1051

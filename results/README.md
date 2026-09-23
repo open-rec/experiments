@@ -17,6 +17,9 @@ organizer's example aggregated-feature profiles on the same official local
 split and fixed downstream trainer. Its local scores remain separate from the
 published final leaderboard's undisclosed target windows.
 
+`synerise-2025-official-local-v2.md` evaluates the expanded OpenRec conversion,
+category, and price features with the same official six-task evaluator.
+
 `music-crs-2026-retrieval-v1.md` records a separate positive-only OpenRec recall
 study over organizer conversation turns. Its target is the logged music turn,
 not the official challenge's listener-preference and response-quality target.

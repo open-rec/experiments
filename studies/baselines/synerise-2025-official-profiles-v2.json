@@ -1,0 +1,8 @@
+{
+  "task": "synerise_official_profiles",
+  "challenge_data_dir": "data/raw/synerise_2025/challenge",
+  "openrec_algorithm": "../rec-algorithm",
+  "profile_version": 2,
+  "official_base_embeddings": "runs/synerise-2025/official-baseline-aligned-v1",
+  "category_hash_bins": 32
+}
