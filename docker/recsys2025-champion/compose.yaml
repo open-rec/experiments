@@ -1,0 +1,40 @@
+services:
+  champion:
+    image: openrec/recsys2025-champion:local
+    user: ${RECSYS2025_UID:?set RECSYS2025_UID}:${RECSYS2025_GID:?set RECSYS2025_GID}
+    build:
+      context: .
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://mirrors.aliyun.com/pypi/simple/}
+    shm_size: 64gb
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["${RECSYS2025_GPU:-0}"]
+              capabilities: [gpu]
+    environment:
+      USER: openrec
+      LOGNAME: openrec
+      HOME: /output/home
+      TORCHINDUCTOR_CACHE_DIR: /output/torch-cache
+      TRITON_CACHE_DIR: /output/triton-cache
+      CUDA_CACHE_PATH: /output/cuda-cache
+      HF_ENDPOINT: ${HF_ENDPOINT:-https://hf-mirror.com}
+      HF_HOME: /output/hf-cache
+      WANDB_MODE: offline
+      WANDB_DIR: /output/wandb
+      WANDB_DATA_DIR: /output/wandb-data
+      WANDB_CACHE_DIR: /output/wandb-cache
+      PYTHONHASHSEED: "42"
+      OPENBLAS_NUM_THREADS: "8"
+      OMP_NUM_THREADS: "8"
+    volumes:
+      - ${RECSYS2025_WINNER_SOURCE:?set RECSYS2025_WINNER_SOURCE}:/source:ro
+      - ${RECSYS2025_OFFICIAL_SOURCE:?set RECSYS2025_OFFICIAL_SOURCE}:/official:ro
+      - ${RECSYS2025_CHALLENGE_DATA:?set RECSYS2025_CHALLENGE_DATA}:/challenge:ro
+      - ${RECSYS2025_RAW_ARCHIVE:?set RECSYS2025_RAW_ARCHIVE}:/raw-events.tar.gz:ro
+      - ${RECSYS2025_OUTPUT:?set RECSYS2025_OUTPUT}:/output
+      - ./run.py:/opt/reproduce/run.py:ro
+    command: ["check"]

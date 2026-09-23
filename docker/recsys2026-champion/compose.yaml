@@ -1,0 +1,11 @@
+services:
+  champion:
+    image: openrec/recsys2026-champion:local
+    build: .
+    user: ${RECSYS2026_UID:?set RECSYS2026_UID}:${RECSYS2026_GID:?set RECSYS2026_GID}
+    environment:
+      HF_ENDPOINT: ${HF_ENDPOINT:-https://hf-mirror.com}
+    volumes:
+      - ${RECSYS2026_WINNER_SOURCE:?set RECSYS2026_WINNER_SOURCE}:/source:ro
+      - ${RECSYS2026_OUTPUT:?set RECSYS2026_OUTPUT}:/output
+    command: ["verify"]
