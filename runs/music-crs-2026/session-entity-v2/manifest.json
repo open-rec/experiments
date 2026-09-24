@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "task": "music_crs_official_devset",
+  "config": {
+    "train_events": "data/raw/music_crs/train.parquet",
+    "test_events": "data/raw/music_crs/test.parquet",
+    "tracks": "data/raw/music_crs/tracks.parquet",
+    "openrec_algorithm": "../rec-algorithm",
+    "neighbor_size": 50,
+    "session_entity_features": true,
+    "semantic_candidates": 80,
+    "text_max_features": 120000,
+    "feature_weights": {
+      "semantic": 0.5,
+      "transition": 2.0,
+      "artist": 1.0,
+      "tag": 0.25,
+      "popularity": 0.1
+    },
+    "weight_selection": "last 400 training sessions only"
+  },
+  "evaluator_commit": "3dd7455179fe69a0396f6007c89c078824498415",
+  "openrec_commit": "6fc06b83bec5cab9b43652ce47ca0d994e14ad92",
+  "source_sha256": "73c390320e6d994df008f98a59ca0f7278b980fd542c50fa98378583ae3353dc",
+  "train_sha256": "9b3fbb8a10f87dfbc390b60493ed87246623b9d61e5aaeab91bf75343cba97d4",
+  "test_sha256": "3081f2583da77865e43f6c33c57ca783e36eb30aaf4d2430cfb4fbf23fdd886d",
+  "catalog_sha256": "8b94651475f0ccb398b24f0bf6fb3c747f24daaae71931f49d27eced6def76ad",
+  "ground_truth_sha256": "4d067ce25fa60e06138bc51f38574fc91e6ab5062b00c8b861169569add9a268",
+  "predictions_sha256": "1f16a7be5b423cd42629935f61196cd61d81ca54285b94392761a2f7d9a04a45",
+  "scores_sha256": "f21ddb56e77649632306e7c1897415d9650ce162a050f3bce734534b3f4c4d34",
+  "official_popularity_parity": {
+    "ndcg@1": 0.0005,
+    "ndcg@10": 0.0017948557430508597,
+    "ndcg@20": 0.002422236419869694,
+    "catalog_diversity": 0.0004248900596970534,
+    "lexical_diversity": 0.0,
+    "total_catalog_size": 47071
+  },
+  "response_policy": "empty text; recommendation metrics only",
+  "feature_roles": [
+    "session",
+    "context",
+    "interaction",
+    "candidate"
+  ]
+}

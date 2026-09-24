@@ -1,0 +1,22 @@
+{
+  "train_events": "data/raw/music_crs/train.parquet",
+  "test_events": "data/raw/music_crs/test.parquet",
+  "tracks": "data/raw/music_crs/tracks.parquet",
+  "openrec_algorithm": "../rec-algorithm",
+  "neighbor_size": 50,
+  "session_entity_features": true,
+  "semantic_candidates": 80,
+  "text_max_features": 120000,
+  "feature_weights": {
+    "semantic": 0.5,
+    "transition": 2.0,
+    "artist": 1.0,
+    "tag": 0.25,
+    "popularity": 0.1
+  },
+  "weight_selection": "grid search on last 400 training sessions only",
+  "weight_selection_metrics": {
+    "discounted_gain_at_20": 0.16012812606897778,
+    "recall_at_20": 0.3790625
+  }
+}

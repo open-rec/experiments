@@ -1,0 +1,6 @@
+method,split,ndcg_at_1,ndcg_at_10,ndcg_at_20,catalog_diversity,lexical_diversity
+LLaMA-1B + BM25,official devset,0.0098,0.0627,0.0815,0.3795,0.2558
+OpenRec Hot + ItemBasedI2I,official devset,0.012125,0.04287967745873413,0.05218237965865201,0.4055150729748678,0.0
+OpenRec Session + Entity + Context,official devset,0.04175,0.10931491348880246,0.12576434213423354,0.44847145801023985,0.0
+absolute improvement,official devset,0.029625,0.06643523603006832,0.07358196247558153,0.04295638503537208,0.0
+relative improvement,official devset,244.3299%,154.9341%,141.0092%,10.5930%,n/a

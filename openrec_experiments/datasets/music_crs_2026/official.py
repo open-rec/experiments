@@ -1,10 +1,13 @@
 """Music-CRS devset inference scored with the organizer's evaluator functions."""
 import json
+import math
 import sys
+from collections import Counter, defaultdict
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 from ...provenance import digest, git_state, write_json
 from ...openrec import load_openrec
@@ -54,6 +57,99 @@ def _rank(history, neighbors, hot, k=20):
     return ranked[:k]
 
 
+def _text(value):
+    if isinstance(value, np.ndarray):
+        return " ".join(str(item) for item in value.tolist())
+    if isinstance(value, (list, tuple)):
+        return " ".join(str(item) for item in value)
+    return "" if value is None else str(value)
+
+
+class _SessionEntityRanker:
+    """Generic entity/context/interaction reranker over the OpenRec recalls."""
+
+    def __init__(self, tracks, sequences, hot, config):
+        self.ids = tracks.track_id.astype(str).tolist()
+        self.index = {value: position for position, value in enumerate(self.ids)}
+        self.hot = [self.index[value] for value in hot if value in self.index]
+        self.artists = [_text(value) for value in tracks.artist_id]
+        self.tags = [set(_text(value).lower().split()) for value in tracks.tag_list]
+        popularity = np.log1p(pd.to_numeric(
+            tracks.popularity, errors="coerce").fillna(0).to_numpy())
+        self.popularity = popularity / max(float(popularity.max()), 1.0)
+        documents = [" ".join((_text(row.track_name), _text(row.artist_name),
+                               _text(row.album_name), _text(row.tag_list)))
+                     for row in tracks.itertuples(index=False)]
+        self.vectorizer = TfidfVectorizer(
+            lowercase=True, ngram_range=(1, 2),
+            min_df=int(config.get("text_min_df", 2)),
+            max_features=int(config.get("text_max_features", 120000)),
+            sublinear_tf=True, strip_accents="unicode")
+        self.entities = self.vectorizer.fit_transform(documents)
+        transitions = defaultdict(Counter)
+        for sequence in sequences:
+            for left, right in zip(sequence, sequence[1:]):
+                transitions[left][right] += 1
+        self.transitions = {key: dict(value) for key, value in transitions.items()}
+        self.semantic_candidates = int(config.get("semantic_candidates", 80))
+        self.weights = config.get("feature_weights", {
+            "semantic": 0.5, "transition": 2.0, "artist": 1.0,
+            "tag": 0.25, "popularity": 0.1,
+        })
+
+    def rank_many(self, requests, k=20):
+        result = []
+        batch_size = 128
+        for start in range(0, len(requests), batch_size):
+            batch = requests[start:start + batch_size]
+            queries = self.vectorizer.transform([item[0] for item in batch])
+            similarities = (queries @ self.entities.T).toarray()
+            for row, (_, history) in zip(similarities, batch):
+                count = min(self.semantic_candidates, len(row))
+                candidates = set(np.argpartition(row, -count)[-count:])
+                transition_scores = {}
+                for offset, trigger in enumerate(history[-5:]):
+                    recency = 1 + len(history[-5:]) - offset
+                    for item, frequency in self.transitions.get(trigger, {}).items():
+                        position = self.index.get(item)
+                        if position is not None:
+                            transition_scores[position] = max(
+                                transition_scores.get(position, 0.0),
+                                math.log1p(frequency) / recency)
+                candidates.update(transition_scores)
+                candidates.update(self.hot[:100])
+                history_positions = [self.index[value] for value in history
+                                     if value in self.index]
+                excluded = set(history_positions)
+                artist_counts = Counter(self.artists[value]
+                                        for value in history_positions)
+                tag_counts = Counter(tag for value in history_positions
+                                     for tag in self.tags[value])
+                tag_total = max(1, sum(tag_counts.values()))
+                history_total = max(1, len(history_positions))
+
+                def score(position):
+                    artist = artist_counts.get(self.artists[position], 0) / history_total
+                    tag = sum(tag_counts.get(value, 0)
+                              for value in self.tags[position]) / tag_total
+                    return (self.weights["semantic"] * row[position]
+                            + self.weights["transition"]
+                            * transition_scores.get(position, 0.0)
+                            + self.weights["artist"] * artist
+                            + self.weights["tag"] * tag
+                            + self.weights["popularity"]
+                            * self.popularity[position])
+
+                ranked = [position for position in sorted(
+                    candidates, key=lambda value: (-score(value), self.ids[value]))
+                    if position not in excluded][:k]
+                if len(ranked) < k:
+                    ranked.extend(position for position in self.hot
+                                  if position not in excluded and position not in ranked)
+                result.append([self.ids[position] for position in ranked[:k]])
+        return result
+
+
 def run(config, evaluator_path, output):
     evaluator = Path(evaluator_path).resolve()
     output = Path(output)
@@ -73,9 +169,10 @@ def run(config, evaluator_path, output):
         "session_id", "conversations", "session_date"
     ])
     test = pd.read_parquet(config["test_events"], columns=[
-        "session_id", "user_id", "conversations"
+        "session_id", "user_id", "user_profile", "conversation_goal",
+        "conversations"
     ])
-    catalog = pd.read_parquet(config["tracks"], columns=["track_id"])
+    catalog = pd.read_parquet(config["tracks"])
     valid = set(catalog.track_id.astype(str))
     rows = []
     for session in train.itertuples(index=False):
@@ -93,17 +190,48 @@ def run(config, evaluator_path, output):
         config.get("neighbor_size", 50)
     )).dump_i2i(cut_size=int(config.get("neighbor_size", 50)))
     truth = json.loads(truth_path.read_text())
+    train_sequences = []
+    for session in train.itertuples(index=False):
+        music = {int(message["turn_number"]): str(message["content"])
+                 for message in session.conversations if message["role"] == "music"}
+        train_sequences.append([music[turn] for turn in sorted(music)])
+    feature_ranker = (_SessionEntityRanker(catalog, train_sequences, hot, config)
+                      if config.get("session_entity_features", False) else None)
+    requests = []
+    request_rows = []
     predictions = []
     for session in test.itertuples(index=False):
         music = {int(m["turn_number"]): str(m["content"])
                  for m in session.conversations if m["role"] == "music"}
+        user_text = {int(m["turn_number"]): str(m["content"])
+                     for m in session.conversations if m["role"] == "user"}
+        goal = _text(session.conversation_goal.get("listener_goal", ""))
+        culture = _text(session.user_profile.get("preferred_musical_culture", ""))
         for turn in range(1, 9):
             history = [music[earlier] for earlier in range(1, turn)]
-            ids = _rank(history, neighbors, hot)
+            if feature_ranker is None:
+                ids = _rank(history, neighbors, hot)
+            else:
+                query = " ".join([user_text.get(earlier, "")
+                                  for earlier in range(max(1, turn - 2), turn + 1)]
+                                 + [goal, culture])
+                requests.append((query, history))
+                request_rows.append((str(session.session_id), str(session.user_id), turn))
+                continue
             if len(ids) != 20 or not set(ids).issubset(valid):
                 raise ValueError("OpenRec produced invalid catalog recommendations")
             predictions.append({
                 "session_id": str(session.session_id), "user_id": str(session.user_id),
+                "turn_number": turn, "predicted_track_ids": ids,
+                "predicted_response": "",
+            })
+    if feature_ranker is not None:
+        for (session_id, user_id, turn), ids in zip(
+                request_rows, feature_ranker.rank_many(requests)):
+            if len(ids) != 20 or not set(ids).issubset(valid):
+                raise ValueError("OpenRec produced invalid catalog recommendations")
+            predictions.append({
+                "session_id": session_id, "user_id": user_id,
                 "turn_number": turn, "predicted_track_ids": ids,
                 "predicted_response": "",
             })
@@ -129,5 +257,7 @@ def run(config, evaluator_path, output):
         "scores_sha256": digest(output / "scores.json"),
         "official_popularity_parity": parity,
         "response_policy": "empty text; recommendation metrics only",
+        "feature_roles": (["session", "context", "interaction", "candidate"]
+                          if feature_ranker is not None else []),
     })
     return scores

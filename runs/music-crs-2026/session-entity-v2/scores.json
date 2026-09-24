@@ -1,0 +1,8 @@
+{
+  "ndcg@1": 0.04175,
+  "ndcg@10": 0.10931491348880246,
+  "ndcg@20": 0.12576434213423354,
+  "catalog_diversity": 0.44847145801023985,
+  "lexical_diversity": 0.0,
+  "total_catalog_size": 47071
+}

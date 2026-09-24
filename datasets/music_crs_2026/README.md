@@ -44,4 +44,10 @@ Run from `experiments/`:
   --config studies/baselines/music-crs-2026-official-devset.json \
   --evaluator /tmp/openrec-music-crs-evaluator \
   --output runs/music-crs-2026/official-devset-v1
+
+# Session/entity/context feature version (weights selected on training sessions)
+.venv/bin/python -m openrec_experiments.cli official-music \
+  --config studies/baselines/music-crs-2026-session-entity-v2.json \
+  --evaluator /tmp/openrec-music-crs-evaluator \
+  --output runs/music-crs-2026/session-entity-v2
 ```
