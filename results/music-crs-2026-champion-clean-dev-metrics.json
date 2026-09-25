@@ -1,0 +1,26 @@
+{
+  "final": {
+    "catalog_diversity": 0.5337893819974082,
+    "lexical_diversity": 0.0,
+    "ndcg@1": 0.056875,
+    "ndcg@10": 0.2462983949494102,
+    "ndcg@20": 0.2772347590848509,
+    "total_catalog_size": 47071
+  },
+  "heuristic": {
+    "catalog_diversity": 0.5261413609228612,
+    "lexical_diversity": 0.0,
+    "ndcg@1": 0.05275,
+    "ndcg@10": 0.145859606403572,
+    "ndcg@20": 0.16956727656460166,
+    "total_catalog_size": 47071
+  },
+  "xgb": {
+    "catalog_diversity": 0.5329183573750292,
+    "lexical_diversity": 0.0,
+    "ndcg@1": 0.16625,
+    "ndcg@10": 0.29367228073629803,
+    "ndcg@20": 0.3237126719843356,
+    "total_catalog_size": 47071
+  }
+}
