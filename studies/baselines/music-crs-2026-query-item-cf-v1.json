@@ -1,0 +1,39 @@
+{
+  "train_events": "data/raw/music_crs/train.parquet",
+  "test_events": "data/raw/music_crs/test.parquet",
+  "tracks": "data/raw/music_crs/tracks.parquet",
+  "openrec_algorithm": "../rec-algorithm",
+  "neighbor_size": 50,
+  "session_entity_features": true,
+  "semantic_candidates": 80,
+  "text_max_features": 120000,
+  "query_embedding_recall": true,
+  "query_embedding_candidates": 100,
+  "query_embedding_device": "cuda:0",
+  "track_embedding_dir": "/ssd/2/xsank.mz/recsys2026-clean-dev/source/models/retrieval_text_towers/Qwen__Qwen3-Embedding-8B/dense_tracks_len256_poollast",
+  "query_embedding_dir": "/ssd/2/xsank.mz/recsys2026-clean-dev/source/models/retrieval_text_towers/Qwen__Qwen3-Embedding-8B/dense_clean_dev_all_turns_query_len512_poollast",
+  "feature_weights": {
+    "semantic": 0.5,
+    "transition": 2.0,
+    "artist": 1.0,
+    "tag": 0.25,
+    "popularity": 0.1,
+    "query_embedding": 1.0,
+    "item_cf": 0.5,
+    "content_i2i": 0.5,
+    "user_cf": 0.5,
+    "sequence_embedding": 0.5,
+    "new": 0.1
+  },
+  "query_embedding_weight_policy": "fixed at 1.0 before official devset evaluation",
+  "base_weight_selection": "grid search on last 400 training sessions only",
+  "channel_candidates": 100,
+  "user_neighbor_size": 50,
+  "sequence_embedding_dimension": 64,
+  "sequence_embedding_device": "cuda:0",
+  "recall_channels": [
+    "item_cf"
+  ],
+  "recall_ablation": "query_embedding + item_cf",
+  "additional_recall_weight_policy": "fixed before official devset evaluation"
+}

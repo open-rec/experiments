@@ -1,0 +1,47 @@
+{
+  "train_events": "data/raw/music_crs/train.parquet",
+  "test_events": "data/raw/music_crs/test.parquet",
+  "tracks": "data/raw/music_crs/tracks.parquet",
+  "openrec_algorithm": "../rec-algorithm",
+  "session_entity_features": false,
+  "query_embedding_recall": false,
+  "lightgbm_rank": true,
+  "track_embedding_dir": "/work/champion/models/retrieval_text_towers/Qwen__Qwen3-Embedding-8B/dense_tracks_len256_poollast",
+  "query_embedding_dir": "/work/champion/models/retrieval_text_towers/Qwen__Qwen3-Embedding-8B/dense_clean_dev_all_turns_query_len512_poollast",
+  "rank_train_query_dirs": [
+    "/work/champion/models/retrieval_text_towers/Qwen__Qwen3-Embedding-8B/dense_splitk_fold_0_cg_val_query_len512_poollast",
+    "/work/champion/models/retrieval_text_towers/Qwen__Qwen3-Embedding-8B/dense_splitk_fold_1_cg_val_query_len512_poollast",
+    "/work/champion/models/retrieval_text_towers/Qwen__Qwen3-Embedding-8B/dense_splitk_fold_2_cg_val_query_len512_poollast",
+    "/work/champion/models/retrieval_text_towers/Qwen__Qwen3-Embedding-8B/dense_splitk_fold_3_cg_val_query_len512_poollast",
+    "/work/champion/models/retrieval_text_towers/Qwen__Qwen3-Embedding-8B/dense_splitk_fold_4_cg_val_query_len512_poollast"
+  ],
+  "rank_validation_query_dirs": [
+    "/work/champion/models/retrieval_text_towers/Qwen__Qwen3-Embedding-8B/dense_splitk_fold_0_reranker_val_query_len512_poollast",
+    "/work/champion/models/retrieval_text_towers/Qwen__Qwen3-Embedding-8B/dense_splitk_fold_1_reranker_val_query_len512_poollast",
+    "/work/champion/models/retrieval_text_towers/Qwen__Qwen3-Embedding-8B/dense_splitk_fold_2_reranker_val_query_len512_poollast",
+    "/work/champion/models/retrieval_text_towers/Qwen__Qwen3-Embedding-8B/dense_splitk_fold_3_reranker_val_query_len512_poollast",
+    "/work/champion/models/retrieval_text_towers/Qwen__Qwen3-Embedding-8B/dense_splitk_fold_4_reranker_val_query_len512_poollast"
+  ],
+  "rank_max_train_requests": 40000,
+  "rank_max_validation_requests": 12000,
+  "rank_train_candidate_count": 160,
+  "rank_candidate_count": 300,
+  "rank_history_candidate_count": 80,
+  "query_embedding_device": "cuda",
+  "seed": 42,
+  "threads": 12,
+  "rank_objective_candidates": ["lambdarank"],
+  "rank_feature_set_candidates": ["base", "fusion"],
+  "lightgbm": {
+    "n_estimators": 1200,
+    "learning_rate": 0.03,
+    "num_leaves": 63,
+    "max_depth": -1,
+    "min_child_samples": 100,
+    "subsample": 0.9,
+    "colsample_bytree": 0.9,
+    "reg_lambda": 2.0,
+    "early_stopping_rounds": 80,
+    "eval_at": [1, 10, 20]
+  }
+}

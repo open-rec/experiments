@@ -1,0 +1,4 @@
+method,ndcg@1,ndcg@10,ndcg@20,recall@20,candidate_recall,candidate_cutoff,catalog_diversity
+openrec_fixed_query_content_i2i,0.0665,0.15309784,0.17424961,0.3495,,,0.50270867
+openrec_lightgbm_v1,0.0735,0.1617699198,0.1836239721,0.36225,0.60175,300,0.4780862952
+champion_clean_xgb,0.16625,0.2936722807,0.3237126720,0.572375,0.82075,200,0.5329183574

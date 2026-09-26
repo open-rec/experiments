@@ -1,0 +1,4 @@
+method,split,ndcg_at_1,ndcg_at_10,ndcg_at_20,catalog_diversity,lexical_diversity
+OpenRec Session + Entity + Context,official devset,0.04175,0.10931491348880246,0.12576434213423354,0.44847145801023985,0.0
+OpenRec + Query Embedding Recall,official devset,0.061625,0.1447916906722993,0.1657708055638591,0.4832699538994285,0.0
+Clean champion XGB,official devset,0.16625,0.29367,0.32371,0.53292,0.0
