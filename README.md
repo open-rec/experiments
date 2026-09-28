@@ -57,9 +57,9 @@ cross-platform lock file.
 
 ### CI installation
 
-CI pins `rec-algorithm` to `9003733844c4ea84e2024bea8e5631e2ec3bb084`,
-which includes the content-feature, LightGBM and Transformer modules used by
-the current experiment runner. Use this revision to reproduce CI locally;
+CI pins `rec-algorithm` to `25276f5a9b59d0e1267da76e6bd9823ba1aecccb`,
+which includes the content-feature, LightGBM, Transformer, sparse retrieval and
+candidate-ranking modules used by the current experiment runner. Use this revision to reproduce CI locally;
 update the pinned revision together with new algorithm-contract dependencies.
 
 CI follows the rank-engine installation pattern: cache pip downloads, install
@@ -230,3 +230,12 @@ The report command verifies artifact digests before export. Every run occupies
 one row and retains its protocol and dataset identity. Results from different
 datasets or incompatible evaluation protocols are never averaged into a single
 score automatically.
+
+
+Experiment encoder support is broader than the production training pipeline.
+`rec-algorithm` exposes `training_models` separately from catalog capabilities;
+session, interaction and logged candidate-context features require their own
+production materializers before cluster release. Sparse retrieval and
+`CandidateRankingFeatureBuilder` experiments do not automatically install a
+trained candidate reranker into rank-engine. See the distribution's
+`docs/feature-model-audit.md` for the checked rollout boundaries.
