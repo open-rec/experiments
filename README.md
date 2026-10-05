@@ -1,5 +1,7 @@
 # OpenRec Experiments
 
+[Release v0.1.0](RELEASE_NOTES.md) · [Changelog](CHANGELOG.md)
+
 Reproducible recommender-system research built on OpenRec. The initial datasets
 are **EB-NeRD**, **KuaiRand-1K**, **RecSys 2025 Synerise**, and **RecSys 2026 Music-CRS**. The project first establishes trustworthy
 baselines, then studies training-serving feature consistency, feature freshness,
@@ -57,7 +59,7 @@ cross-platform lock file.
 
 ### CI installation
 
-CI pins `rec-algorithm` to `25276f5a9b59d0e1267da76e6bd9823ba1aecccb`,
+CI pins `rec-algorithm` to `e2bab2c3a4d0692756da9eb4abd4414e126bab87`,
 which includes the content-feature, LightGBM, Transformer, sparse retrieval and
 candidate-ranking modules used by the current experiment runner. Use this revision to reproduce CI locally;
 update the pinned revision together with new algorithm-contract dependencies.

@@ -22,7 +22,7 @@ jobs:
         with:
           repository: open-rec/rec-algorithm
           # Includes sparse retrieval, candidate ranking, and dynamic feature contracts.
-          ref: 25276f5a9b59d0e1267da76e6bd9823ba1aecccb
+          ref: e2bab2c3a4d0692756da9eb4abd4414e126bab87
           path: rec-algorithm
       - uses: actions/setup-python@v6
         with:
