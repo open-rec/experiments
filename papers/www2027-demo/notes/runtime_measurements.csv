@@ -1,0 +1,12 @@
+operation,mode,hardware_id,workload_id,concurrency,warmup_count,sample_count,failure_count,p50_ms,p95_ms,min_ms,max_ms,timing_start,timing_end,graph_version,recall_version,model_version,raw_evidence_path,notes,verified_success_count,timeout_count,policy_name,feature_snapshot_id,poll_interval_ms
+recommend_normal,cluster,,,,,,,,,,,request_start,response_complete,,,,,pending,,,,,
+recommend_debug,cluster,,,,,,,,,,,request_start,response_complete,,,,,pending,,,,,
+graph_publish,cluster,,,,,,,,,,,publish_start,route_ready,,,,,pending,,,,,
+graph_rollback,cluster,,,,,,,,,,,rollback_start,route_ready,,,,,pending,,,,,
+recall_activate,cluster,,,,,,,,,,,activate_start,alias_verified,,,,,pending,,,,,
+recall_rollback,cluster,,,,,,,,,,,rollback_start,alias_verified,,,,,pending,,,,,
+model_activate,cluster,,,,,,,,,,,activate_start,loaded_version_verified,,,,,pending,,,,,
+model_rollback,cluster,,,,,,,,,,,rollback_start,loaded_version_verified,,,,,pending,,,,,
+feedback_rule_projection,cluster,,,,,,,,,,,feedback_submit,dislike_rule_verified,,,,,pending,,,,,
+feedback_feature_projection,cluster,,,,,,,,,,,feedback_submit,feature_snapshot_verified,,,,,pending,,,,,
+ranking_feature_refresh,cluster,,,,,,,,,,,refresh_start,encoded_snapshot_refreshed,,,,,pending,,,,,

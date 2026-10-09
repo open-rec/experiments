@@ -1,0 +1,22 @@
+% All 17 configured nodes and 18 edges, with exact dependency groups.
+\begin{tikzpicture}[x=1mm,y=1mm,font=\fontsize{6.5}{7.5}\selectfont,
+ box/.style={draw=black!65,rounded corners=1.3pt,align=center,text width=32mm,minimum height=8mm,inner sep=2.5pt,fill=blue!5},
+ dep/.style={-{Latex[length=1.5mm]},draw=black!75}]
+\node[box] (trigger) at (0,0) {\texttt{user\_trigger}\\click history / explicit items};
+\node[box] (triggered) at (0,-16) {\texttt{item\_cf\_i2i}\\\texttt{content\_i2i}\\\texttt{item\_seq\_emb}};
+\node[box] (independent) at (40,-16) {\texttt{user\_cf\_u2i}\\\texttt{query\_emb}, \texttt{sparse}\\\texttt{hot}, \texttt{new}};
+\node[box] (combine) at (0,-34) {\texttt{combine}\\merge + apply filters};
+\node[box,fill=orange!10] (filters) at (40,-34) {\texttt{filter}, \texttt{black}\\exposure / blacklist / dislike};
+\node[box] (rank) at (0,-49) {\texttt{rank}\\model score + recall fusion};
+\node[box,fill=green!8] (features) at (40,-49) {\texttt{user\_feature}: user ID\\\texttt{item\_feature}: reserved};
+\node[box] (operation) at (0,-64) {\texttt{operation}\\channel / diversity policy};
+\node[box] (collector) at (40,-64) {\texttt{collector}\\response items};
+\draw[dep] (trigger)--(triggered);
+\draw[dep] (triggered)--(combine);
+\draw[dep] (independent.south) -- (combine.north east);
+\draw[dep] (filters)--(combine);
+\draw[dep] (combine)--(rank);
+\draw[dep] (features)--(rank);
+\draw[dep] (rank)--(operation);
+\draw[dep] (operation)--(collector);
+\end{tikzpicture}

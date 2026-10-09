@@ -1,0 +1,78 @@
+{
+  "source": "rec-server/server/src/main/resources/item_graph.json",
+  "source_sha256": "0f902d03216eb953b6e9ff79047cb483069fe9c7f37beebfff8c096c3070850f",
+  "node_count": 17,
+  "edge_count": 18,
+  "groups": {
+    "trigger": [
+      "user_trigger"
+    ],
+    "triggered": [
+      "item_cf_i2i",
+      "content_i2i",
+      "item_seq_emb"
+    ],
+    "independent": [
+      "user_cf_u2i",
+      "query_emb",
+      "sparse",
+      "hot",
+      "new"
+    ],
+    "combine": [
+      "combine"
+    ],
+    "filters": [
+      "filter",
+      "black"
+    ],
+    "rank": [
+      "rank"
+    ],
+    "features": [
+      "user_feature",
+      "item_feature"
+    ],
+    "operation": [
+      "operation"
+    ],
+    "collector": [
+      "collector"
+    ]
+  },
+  "group_edges": [
+    [
+      "trigger",
+      "triggered"
+    ],
+    [
+      "triggered",
+      "combine"
+    ],
+    [
+      "independent",
+      "combine"
+    ],
+    [
+      "filters",
+      "combine"
+    ],
+    [
+      "combine",
+      "rank"
+    ],
+    [
+      "features",
+      "rank"
+    ],
+    [
+      "rank",
+      "operation"
+    ],
+    [
+      "operation",
+      "collector"
+    ]
+  ],
+  "validation": "Exact node coverage and group-expanded dependency equality verified against source JSON."
+}

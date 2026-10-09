@@ -1,0 +1,40 @@
+% Paper adaptation of .github/profile/README.md: Cluster architecture.
+% Group storage/compute roles and show selected API/data/control links.
+\begin{tikzpicture}[x=1mm,y=1mm,font=\fontsize{6.5}{7.4}\selectfont,
+ box/.style={draw=black!65,rounded corners=1.3pt,align=center,text width=22mm,minimum height=10mm,inner sep=2pt,fill=blue!4},
+ store/.style={box,fill=green!7},
+ ctrl/.style={box,fill=orange!10},
+ data/.style={-{Latex[length=1.4mm]},draw=black!70},
+ ctl/.style={data,dashed,draw=orange!70!black}]
+\node[box] (client) at (0,0) {Web / SDK\\requests + feedback};
+\node[ctrl] (console) at (27,0) {rec-console\\graphs / releases\\training / analytics};
+\node[ctrl] (metrics) at (54,0) {Grafana\\Prometheus\\API observability};
+\node[box] (server) at (0,-18) {rec-server\\serving DAG\\push API};
+\node[store] (serving) at (27,-18) {Redis: online state\\Elasticsearch:\\active recall aliases};
+\node[box] (rank) at (54,-18) {rank-engine\\inference +\\fitted features};
+\node[box] (kafka) at (0,-37) {Kafka\\mutation stream};
+\node[store] (history) at (27,-37) {HBase: archive\\Hive / HDFS:\\partitioned history};
+\node[store] (models) at (54,-37) {Versioned models\\weights + encoders};
+\node[box] (processor) at (0,-55) {data-processor\\Spark or Flink};
+\node[box] (offline) at (27,-55) {rec-algorithm\\Spark preparation\\recall / train / analytics};
+\node[ctrl] (airflow) at (54,-55) {Airflow\\algorithm runner\\scheduled / on demand};
+\draw[data,<->] (client)--(server);
+\draw[ctl] (console)--(server);
+\draw[ctl] (console)--(serving);
+\draw[ctl] (console)--(rank);
+\draw[ctl] (console)--(metrics);
+\draw[data] (server)--(serving);
+\draw[data] (server.south) -- (0,-27) -- (54,-27) -- (rank.south);
+\draw[data] (server)--(kafka);
+\draw[data] (kafka)--(processor);
+\draw[data] (processor)--(history);
+\draw[data] (processor.east) -- (13.5,-55) -- (13.5,-29) -- (27,-29) -- (serving.south);
+\draw[data] (history)--(offline);
+\draw[data] (airflow)--(offline);
+\draw[data] (offline)--(models);
+\draw[data] (models)--(rank);
+\draw[data] (serving)--(rank);
+\draw[data] (offline.east) -- (40.5,-55) -- (40.5,-18) -- (serving.east);
+\node[align=center,font=\fontsize{6}{7}\selectfont,text width=81mm] at (27,-68)
+ {Solid: selected API/data paths. Dashed: console control/access.\\Console also controls Airflow; Prometheus scrapes API metrics.\\Offline writes staging indexes; console activates serving aliases.};
+\end{tikzpicture}
