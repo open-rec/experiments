@@ -207,7 +207,10 @@ EB-NeRD-large training with complete or representative ranking groups. Future
 impression features should remain a separately labeled challenge-only protocol,
 not enter the online OpenRec baseline.
 
-Detailed metric tables are retained in
-[`results/ebnerd-small-lightgbm-v1.md`](../results/ebnerd-small-lightgbm-v1.md),
-and the winner reproduction is documented in
-[`results/ebnerd-small-recsys2024-reference.md`](../results/ebnerd-small-recsys2024-reference.md).
+The retained [common-feature model comparison](../results/ebnerd-small-common-features-v2.md)
+reports the current pruned configuration; the
+[earlier three-seed comparison](../results/ebnerd-small-model-comparison-v1.md) records the stage-7
+model matrix. The former standalone LightGBM and winner-reproduction summary files are no longer
+present in this checkout. Historical measurements above retain their stated protocols; the
+[reference environment guide](../docker/recsys2024-reference/README.md) documents how to run the
+winner code, not a replacement result report.

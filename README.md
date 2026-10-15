@@ -238,4 +238,7 @@ session, interaction and logged candidate-context features require their own
 production materializers before cluster release. Sparse retrieval and
 `CandidateRankingFeatureBuilder` experiments do not automatically install a
 trained candidate reranker into rank-engine. See the distribution's
-`docs/feature-model-audit.md` for the checked rollout boundaries.
+[feature and model lifecycle](../example/docs/architecture.md#feature-and-model-lifecycle) and
+[feature time contract](../example/docs/feature-time-contract.md) for production rollout boundaries.
+The [common-feature result audit](results/ebnerd-small-common-features-v2.md#feature-ownership-audit)
+separately identifies the experimental features that still lack online materialization.

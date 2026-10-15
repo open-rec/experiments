@@ -37,12 +37,13 @@ using only the stable OpenRec global point-in-time feature catalog. Its
 companion CSV preserves per-seed metrics and excludes dataset-specific content
 or EB-NeRD-only features.
 
-The EB-NeRD-small summary also includes a clearly separated validation reference
-from the supplied RecSys Challenge 2024 first-place source tree. External rows
+The retained EB-NeRD-small model summaries include a clearly separated
+validation reference from the supplied RecSys Challenge 2024 first-place source tree. External rows
 are not added to the run-derived CSV and are not treated as protocol-matched
 OpenRec experiments.
 
-`ebnerd-large-to-small-v1.md` records the separate scale experiment that trains
+The historical `ebnerd-large-to-small-v1.md` summary is not retained in this
+checkout. It recorded the separate scale experiment that trains
 on the large population with deterministic negative sampling and predicts the
 complete small validation candidate sets. Its protocol differences are stated
 next to the result and it is not merged into the baseline-v1 comparison table.
@@ -50,17 +51,20 @@ The body-embedding input used by that historical run has been retired because
 EB-NeRD does not provide reliable body text for the entity population and its
 measured gain did not justify the storage and inference cost.
 
-`ebnerd-small-recsys2024-reference.md` records an isolated execution of the
+The historical `ebnerd-small-recsys2024-reference.md` summary is not retained in
+this checkout. It recorded an isolated execution of the
 RecSys Challenge 2024 winner repository's supplied Kami small configurations.
 It reports complete-validation impression AUC for LightGBM, CatBoost, and their
 tree-only weighted mean, and separates these results from the repository's
 large-data neural ensemble reference.
 
-`ebnerd-small-lightgbm-v1.md` is the first protocol-matched OpenRec tree
+The historical `ebnerd-small-lightgbm-v1.md` summary is not retained in this
+checkout. It recorded the first protocol-matched OpenRec tree
 baseline. It compares the existing content selection with an expanded selection
 of already implemented causal aggregates.
 
-`ebnerd-small-context-v1.md` records the first categorized feature-family
+The historical `ebnerd-small-context-v1.md` summary is not retained in this
+checkout. It recorded the first categorized feature-family
 ablation across LR, FM, and LightGBM. Context is useful for the tree ranker but
 is not enabled universally because it does not improve all three models.
 
