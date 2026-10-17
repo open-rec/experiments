@@ -96,7 +96,7 @@ class _SessionEntityRanker:
         self.semantic_candidates = int(config.get("semantic_candidates", 80))
         self.query_recall = query_recall
         self.query_vectors = query_vectors or {}
-        self.query_candidates = int(config.get("query_embedding_candidates", 100))
+        self.query_candidates = int(config.get("query_qwen_emb_candidates", 100))
         self.query_dimension = (query_recall._vectors.shape[1]
                                 if query_recall is not None else 0)
         self.item_neighbors = item_neighbors or {}
@@ -114,7 +114,7 @@ class _SessionEntityRanker:
         self.new_candidates = {}
         self.weights = config.get("feature_weights", {
             "semantic": 0.5, "transition": 2.0, "artist": 1.0,
-            "tag": 0.25, "popularity": 0.1, "query_embedding": 0.0,
+            "tag": 0.25, "popularity": 0.1, "query_qwen_emb": 0.0,
         })
 
     def rank_many(self, requests, k=20):
@@ -241,7 +241,7 @@ class _SessionEntityRanker:
                             + self.weights["tag"] * tag
                             + self.weights["popularity"]
                             * self.popularity[position]
-                            + self.weights.get("query_embedding", 0.0)
+                            + self.weights.get("query_qwen_emb", 0.0)
                             * query_scores.get(position, 0.0)
                             + sum(self.weights.get(channel, 0.0) * values.get(position, 0.0)
                                   for channel, values in channel_scores.items()))
@@ -270,6 +270,7 @@ def run(config, evaluator_path, output):
     root = load_openrec(config["openrec_algorithm"])
     from algorithm.recall.hot import Hot
     from algorithm.recall.item_cf_i2i import ItemBasedI2I
+    from algorithm.recall.query_qwen_emb import QueryQwenEmbeddingRecall
     from algorithm.recall.query_embedding import QueryEmbeddingRecall
 
     train = pd.read_parquet(config["train_events"], columns=[
@@ -305,9 +306,9 @@ def run(config, evaluator_path, output):
         train_sequences.append([music[turn] for turn in sorted(music)])
     query_recall = None
     query_vectors = None
-    if config.get("query_embedding_recall", False):
+    if config.get("query_qwen_emb_recall", False):
         track_dir = Path(config["track_embedding_dir"])
-        query_dir = Path(config["query_embedding_dir"])
+        query_dir = Path(config["query_qwen_emb_dir"])
         track_ids = np.load(track_dir / "track_ids.npy", allow_pickle=True)
         track_vectors = np.load(track_dir / "embeddings.npy", mmap_mode="r")
         query_meta = pd.read_parquet(query_dir / "query_meta.parquet",
@@ -319,10 +320,10 @@ def run(config, evaluator_path, output):
             (str(row.session_id), int(row.turn_number)): query_matrix[position]
             for position, row in enumerate(query_meta.itertuples(index=False))
         }
-        query_recall = QueryEmbeddingRecall(
+        query_recall = QueryQwenEmbeddingRecall(
             track_ids, track_vectors,
-            recall_size=int(config.get("query_embedding_candidates", 100)),
-            device=config.get("query_embedding_device", "cpu"))
+            recall_size=int(config.get("query_qwen_emb_candidates", 100)),
+            device=config.get("query_qwen_emb_device", "cpu"))
     enabled_channels = set(config.get("recall_channels", []))
     user_candidates = None
     if "user_cf" in enabled_channels:
@@ -359,7 +360,7 @@ def run(config, evaluator_path, output):
         from .lightgbm_rank import train_and_predict
         output.mkdir(parents=True, exist_ok=True)
         predictions, rank_diagnostics = train_and_predict(
-            config, catalog, hot, config["query_embedding_dir"], output, train, test)
+            config, catalog, hot, config["query_qwen_emb_dir"], output, train, test)
         # The generic rank adapter has already produced every test request.
         test = test.iloc[0:0]
     for session in test.itertuples(index=False):
@@ -423,7 +424,7 @@ def run(config, evaluator_path, output):
         "feature_roles": (["session", "context", "interaction", "candidate"]
                           if feature_ranker is not None or rank_diagnostics else []),
         "recall_channels": (rank_diagnostics["channels"] if rank_diagnostics else
-                            sorted(set(["hot", "query_embedding"]
+                            sorted(set(["hot", "query_qwen_emb"]
                                        if query_recall is not None else ["hot"])
                                    | enabled_channels)),
         "rank_model": ("openrec_lightgbm_%s" % rank_diagnostics["selected_objective"]

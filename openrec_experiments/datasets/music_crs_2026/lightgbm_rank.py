@@ -104,7 +104,7 @@ def _materialize(rows, query_vectors, query_recall, history_recall, builder,
             history_items = _channel_pairs(history_result)
             transition_items = _transition_pairs(
                 history, row["session_id"], transitions, session_transitions, history_count)
-            channels = {"query_embedding": query_items,
+            channels = {"query_qwen_emb": query_items,
                         "history_embedding": history_items,
                         "sequence_transition": transition_items, "popular": hot}
             if sparse_recall is not None:
@@ -170,6 +170,7 @@ def train_and_predict(config, catalog, hot_ids, dev_query_dir, output,
     from algorithm.feature.candidate_ranking import CandidateRankingFeatureBuilder
     from algorithm.rank.lightgbm import LightGBMRankModel
     from algorithm.recall.bm25 import BM25Recall
+    from algorithm.recall.query_qwen_emb import QueryQwenEmbeddingRecall
     from algorithm.recall.query_embedding import QueryEmbeddingRecall
 
     track_root = Path(config["track_embedding_dir"])
@@ -182,7 +183,7 @@ def train_and_predict(config, catalog, hot_ids, dev_query_dir, output,
              + metadata.tag_list.map(lambda value: " ".join(map(str, value))
                                      if isinstance(value, (list, tuple, np.ndarray)) else str(value)))
     sparse_enabled = bool(config.get("sparse_recall", False))
-    channel_names = ["query_embedding", "history_embedding",
+    channel_names = ["query_qwen_emb", "history_embedding",
                      "sequence_transition", "popular"]
     if sparse_enabled:
         channel_names.append("sparse")
@@ -198,10 +199,10 @@ def train_and_predict(config, catalog, hot_ids, dev_query_dir, output,
     train_candidate_count = int(config.get("rank_train_candidate_count", 120))
     history_count = int(config.get("rank_history_candidate_count", 80))
     sparse_count = int(config.get("rank_sparse_candidate_count", 100))
-    query_recall = QueryEmbeddingRecall(item_ids, item_vectors, recall_size=candidate_count,
-                                        device=config.get("query_embedding_device", "cpu"))
+    query_recall = QueryQwenEmbeddingRecall(item_ids, item_vectors, recall_size=candidate_count,
+                                        device=config.get("query_qwen_emb_device", "cpu"))
     history_recall = QueryEmbeddingRecall(item_ids, item_vectors, recall_size=history_count,
-                                          device=config.get("query_embedding_device", "cpu"))
+                                          device=config.get("query_qwen_emb_device", "cpu"))
     sparse_recall = None
     if sparse_enabled:
         def text(value):

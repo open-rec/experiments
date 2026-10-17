@@ -242,3 +242,17 @@ trained candidate reranker into rank-engine. See the distribution's
 [feature time contract](../example/docs/feature-time-contract.md) for production rollout boundaries.
 The [common-feature result audit](results/ebnerd-small-common-features-v2.md#feature-ownership-audit)
 separately identifies the experimental features that still lack online materialization.
+
+## Algorithm-specific query recall names
+
+The Music CRS strategy and active configuration keys now use `query_qwen_emb`
+(`query_qwen_emb_recall`, `_dir`, `_device`, `_candidates`, and feature weight
+`query_qwen_emb`). It uses frozen `Qwen/Qwen3-Embedding-8B`, last-token pooling,
+L2 normalization and 4096-dimensional query/catalog vectors. The OpenRec adapter is
+`algorithm.recall.query_qwen_emb.QueryQwenEmbeddingRecall`; generic history and sequence
+retrieval retains the generic `QueryEmbeddingRecall` and does not imply Qwen encoding.
+
+Upstream cache filenames (`query_embeddings.npy`, `query_meta.parquet`), published result
+reports and baseline config filenames retain their historical names for reproducibility.
+Migrate custom configuration keys and regenerate rank features/models when changing the
+channel name; existing recorded metrics are not results of a rerun under the new names.
