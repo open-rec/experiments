@@ -8,6 +8,10 @@ Results are preliminary until the protocol document removes its draft status,
 official scorer parity is established, and all declared strong baselines have
 been reproduced.
 
+`openrec-0.2.0-regression-audit.md` records release compatibility checks and
+real-data reruns against the algorithm revision pinned by OpenRec 0.2.0.
+It distinguishes reproduced experiments from evaluations unavailable locally.
+
 `music-crs-2026-official-devset-v1.md` compares OpenRec Hot + ItemBasedI2I with
 the organizer's published devset baselines using the same recommendation
 metrics. The official Popularity prediction artifact passes scorer parity.

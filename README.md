@@ -57,7 +57,8 @@ cross-platform lock file.
 
 ### CI installation
 
-CI pins `rec-algorithm` to `25276f5a9b59d0e1267da76e6bd9823ba1aecccb`,
+CI pins `rec-algorithm` to `8cd58b8491470027a5e24ed1e4dd7cfd99d569fb`,
+the revision locked by the OpenRec 0.2.0 distribution release manifest,
 which includes the content-feature, LightGBM, Transformer, sparse retrieval and
 candidate-ranking modules used by the current experiment runner. Use this revision to reproduce CI locally;
 update the pinned revision together with new algorithm-contract dependencies.
